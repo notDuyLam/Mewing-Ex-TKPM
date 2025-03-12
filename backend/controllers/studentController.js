@@ -19,7 +19,7 @@ exports.getStudentById = async (req, res) => {
     const studentId = req.params.id;
     try {
         const student = await Student.findByPk(studentId); 
-        if(!student) {
+        if(!student) {    
             return res.status(404).json({ message: "Cannot find student"});
         }
         res.json(student);
