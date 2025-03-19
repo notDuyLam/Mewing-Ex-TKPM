@@ -4,6 +4,7 @@ import StudentTable from "@/components/StudentTable";
 import StudentModal from "@/components/StudentModal";
 export default function StudentsPage() {
     const [isOpen, setIsOpen] = useState(false);
+    const [onStudentChange, setOnStudentChange] = useState();
     return (
         <div className="w-full px-8">
             <div className="flex mb-4">

@@ -16,12 +16,39 @@ type Student = {
 
 export default function StudentTable() {
     const [students, setStudents] = useState<Student[]>([]);
-
+    const serverPath = process.env.NEXT_PUBLIC_SERVER_PATH;
     useEffect(() => {
-        fetch("/api/students")
+        fetch(serverPath + "")
             .then((res) => res.json())
             .then((data) => setStudents(data));
     }, []);
+
+    const handleDelete = async (id: string) => {
+        try {
+            const response = await fetch(serverPath + `/api/students/${id}`, {
+                method: "DELETE",
+            });
+            if (response.ok) {
+                setStudents(students.filter((student) => student.id !== id));
+            }
+        } catch (error) {
+            console.error("Error deleting student:", error);
+        }
+    };
+
+    const handleChange = async (id: string) => {
+        try {
+            const response = await fetch(serverPath + `/api/students/${id}`, {
+                method: "PUT",
+            });
+            if (response.ok) {
+                const newStudent = await response.json();
+                setStudents(newStudent);
+            }
+        } catch (error) {
+            console.error("Error changing student status:", error);
+        }
+    }
 
     return (
         <div className="w-full">
@@ -41,17 +68,16 @@ export default function StudentTable() {
                 <tbody>
                     {students.map((student) => (
                         <tr key={student.id}>
-                            <td>{student.id}</td>
-                            <td>{student.name}</td>
-                            <td>{student.dob}</td>
-                            <td>{student.gender}</td>
-                            <td>{student.faculty}</td>
-                            <td>{student.schoolYear}</td>
-                            <td>{student.status}</td>
-                            <td>
-                                <Link href={`/students/${student.id}`} className="btn btn-primary">
-                                    Xem
-                                </Link>
+                            <td className="px-4 py-3 text-left">{student.id}</td>
+                            <td className="px-4 py-3 text-center">{student.name}</td>
+                            <td className="px-4 py-3 text-center">{new Date(student.dob).toLocaleDateString('vi-VN')}</td>
+                            <td className="px-4 py-3 text-center">{student.gender}</td>
+                            <td className="px-4 py-3 text-center">{student.faculty}</td>
+                            <td className="px-4 py-3 text-center">{student.schoolYear}</td>
+                            <td className="px-4 py-3 text-center">{student.status}</td>
+                            <td className="flex justify-center gap-4 px-4 py-3">
+                                <button className="py-2 px-4 bg-green-500 text-white cursor-pointer rounded-lg" onClick={()=>handleChange(student.id)}>Sửa</button>
+                                <button className="py-2 px-4 bg-red-500 text-white cursor-pointer rounded-lg" onClick={() => handleDelete(student.id)}>Xóa</button>
                             </td>
                         </tr>
                     ))}
