@@ -32,7 +32,6 @@ const createStudent = async (req, res) => {
         department: req.body.department,
         course: req.body.course,
         program: req.body.program,
-        address: req.body.address,
         email: req.body.email,
         phoneNumber: req.body.phoneNumber,
         status: req.body.status
