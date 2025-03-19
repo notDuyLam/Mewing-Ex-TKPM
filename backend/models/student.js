@@ -33,7 +33,6 @@ module.exports = (sequelize, DataTypes) => {
     department: DataTypes.STRING,
     course: DataTypes.STRING,
     program: DataTypes.STRING,
-    address: DataTypes.STRING,
     email: DataTypes.STRING,
     phoneNumber: DataTypes.STRING,
     status: DataTypes.STRING
