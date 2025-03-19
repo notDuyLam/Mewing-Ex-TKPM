@@ -1,23 +1,13 @@
-import { useState } from "react";
+"use client";
+import { useState, useEffect } from "react";
 
-export default function StudentModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export default function StudentModal({ isOpen, onClose, initialStudent }: { isOpen: boolean; onClose: () => void; initialStudent?: any }) {
     if (!isOpen) return null;
     const serverPath = process.env.NEXT_PUBLIC_SERVER_PATH;
-    console.log(serverPath);
 
-    const [student, setStudent] = useState({
-        id: "",
-        name: "",
-        dob: "",
-        gender: "Nam",
-        faculty: "Khoa Luật",
-        schoolYear: "",
-        program: "",
-        address: "",
-        email: "",
-        phone: "",
-        status: "Đang học",
-    });
+    const isEditing = Boolean(initialStudent.id.length !== 0);
+
+    const [student, setStudent] = useState<any>(initialStudent);
 
     const [error, setError] = useState("");
 
@@ -57,24 +47,47 @@ export default function StudentModal({ isOpen, onClose }: { isOpen: boolean; onC
 
         if (!validateForm()) return;
 
-        try {
-            const response = await fetch(serverPath + "/api/students", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(student),
-            });
+        if (isEditing) {
+            try {
+                const response = await fetch(serverPath + `/api/students/${initialStudent.id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(student),
+                });
 
-            if (!response.ok) {
-                throw new Error("Có lỗi xảy ra khi gửi dữ liệu.");
+                if (!response.ok) {
+                    throw new Error("Có lỗi xảy ra khi gửi dữ liệu.");
+                }
+
+                alert("Cập nhật sinh viên thành công!");
+                onClose(); // Đóng modal sau khi thành công
+            } catch (error) {
+                setError("Lỗi khi gửi dữ liệu lên server.");
             }
-
-            alert("Thêm sinh viên thành công!");
-            onClose(); // Đóng modal sau khi thành công
-        } catch (error) {
-            setError("Lỗi khi gửi dữ liệu lên server.");
         }
+        else {
+            try {
+                const response = await fetch(serverPath + "/api/students", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(student),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Có lỗi xảy ra khi gửi dữ liệu.");
+                }
+
+                alert("Thêm sinh viên thành công!");
+                onClose(); // Đóng modal sau khi thành công
+            } catch (error) {
+                setError("Lỗi khi gửi dữ liệu lên server.");
+            }
+        }
+
     };
 
     return (
@@ -91,22 +104,22 @@ export default function StudentModal({ isOpen, onClose }: { isOpen: boolean; onC
                     <div className="grid grid-cols-2 gap-4">
                         <div className="mb-4">
                             <label htmlFor="id">Mã số sinh viên *</label>
-                            <input className="border border-gray-300 w-full p-2 round-sm" type="text" id="id" required onChange={handleChange} />
+                            <input className="border border-gray-300 w-full p-2 round-sm" type="text" id="id" required disabled={isEditing} value={student.id} onChange={handleChange} />
                         </div>
 
                         <div className="mb-4">
                             <label htmlFor="name">Họ tên *</label>
-                            <input className="border border-gray-300 w-full p-2 round-sm" type="text" id="name" required onChange={handleChange} />
+                            <input className="border border-gray-300 w-full p-2 round-sm" type="text" id="name" required value={student.name} onChange={handleChange} />
                         </div>
 
                         <div className="mb-4">
                             <label htmlFor="dob">Ngày tháng năm sinh *</label>
-                            <input className="border border-gray-300 w-full p-2 round-sm" type="date" id="dob" required onChange={handleChange} />
+                            <input className="border border-gray-300 w-full p-2 round-sm" type="date" id="dob" required value={student.dob ? new Date(student.dob).toISOString().split('T')[0] : ''} onChange={handleChange} />
                         </div>
 
                         <div className="mb-4">
                             <label htmlFor="gender">Giới tính *</label>
-                            <select className="border border-gray-300 w-full p-2 round-sm" id="gender" required onChange={handleChange}>
+                            <select className="border border-gray-300 w-full p-2 round-sm" id="gender" required value={student.gender} onChange={handleChange}>
                                 <option value="Nam">Nam</option>
                                 <option value="Nữ">Nữ</option>
                                 <option value="Khác">Khác</option>
@@ -115,7 +128,7 @@ export default function StudentModal({ isOpen, onClose }: { isOpen: boolean; onC
 
                         <div className="mb-4">
                             <label htmlFor="faculty">Khoa *</label>
-                            <select className="border border-gray-300 w-full p-2 round-sm" id="faculty" required onChange={handleChange}>
+                            <select className="border border-gray-300 w-full p-2 round-sm" id="faculty" required value={student.faculty} onChange={handleChange}>
                                 <option value="Khoa Luật">Khoa Luật</option>
                                 <option value="Khoa Tiếng Anh thương mại">Khoa Tiếng Anh thương mại</option>
                                 <option value="Khoa Tiếng Nhật">Khoa Tiếng Nhật</option>
@@ -125,32 +138,32 @@ export default function StudentModal({ isOpen, onClose }: { isOpen: boolean; onC
 
                         <div className="mb-4">
                             <label htmlFor="schoolYear">Khóa *</label>
-                            <input className="border border-gray-300 w-full p-2 round-sm" type="text" id="schoolYear" required onChange={handleChange} />
+                            <input className="border border-gray-300 w-full p-2 round-sm" type="text" id="schoolYear" required value={student.schoolYear} onChange={handleChange} />
                         </div>
 
                         <div className="mb-4">
                             <label htmlFor="program">Chương trình</label>
-                            <input className="border border-gray-300 w-full p-2 round-sm" type="text" id="program" onChange={handleChange} />
+                            <input className="border border-gray-300 w-full p-2 round-sm" type="text" id="program" value={student.program} onChange={handleChange} />
                         </div>
 
                         <div className="mb-4">
                             <label htmlFor="address">Địa chỉ</label>
-                            <textarea className="border border-gray-300 w-full p-2 round-sm" id="address" rows={3} onChange={handleChange}></textarea>
+                            <textarea className="border border-gray-300 w-full p-2 round-sm" id="address" rows={3} value={student.address} onChange={handleChange}></textarea>
                         </div>
 
                         <div className="mb-4">
                             <label htmlFor="email">Email *</label>
-                            <input className="border border-gray-300 w-full p-2 round-sm" type="email" id="email" required onChange={handleChange} />
+                            <input className="border border-gray-300 w-full p-2 round-sm" type="email" id="email" required value={student.email} onChange={handleChange} />
                         </div>
 
                         <div className="mb-4">
                             <label htmlFor="phone">Số điện thoại *</label>
-                            <input className="border border-gray-300 w-full p-2 round-sm" type="tel" id="phone" required onChange={handleChange} />
+                            <input className="border border-gray-300 w-full p-2 round-sm" type="tel" id="phone" required value={student.phone} onChange={handleChange} />
                         </div>
 
                         <div className="mb-4">
                             <label htmlFor="status">Tình trạng sinh viên *</label>
-                            <select className="border border-gray-300 w-full p-2 round-sm" id="status" required onChange={handleChange}>
+                            <select className="border border-gray-300 w-full p-2 round-sm" id="status" required value={student.status} onChange={handleChange}>
                                 <option value="Đang học">Đang học</option>
                                 <option value="Đã tốt nghiệp">Đã tốt nghiệp</option>
                                 <option value="Đã thôi học">Đã thôi học</option>

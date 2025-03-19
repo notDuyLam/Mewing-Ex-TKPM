@@ -1,53 +1,14 @@
 "use client"; 
-
 import "@/globals.css";
-import { useEffect, useState } from "react";
-import Link from "next/link";
 
-type Student = {
-    id: string;
-    name: string;
-    dob: string;
-    gender: string;
-    faculty: string;
-    schoolYear: string;
-    status: string;
-};
-
-export default function StudentTable() {
-    const [students, setStudents] = useState<Student[]>([]);
-    const serverPath = process.env.NEXT_PUBLIC_SERVER_PATH;
-    useEffect(() => {
-        fetch(serverPath + "")
-            .then((res) => res.json())
-            .then((data) => setStudents(data));
-    }, []);
-
+export default function StudentTable({students, updateStudent, deleteStudent}:
+    {students: any, updateStudent: (id: string) => void, deleteStudent: (id: string) => void}) {
     const handleDelete = async (id: string) => {
-        try {
-            const response = await fetch(serverPath + `/api/students/${id}`, {
-                method: "DELETE",
-            });
-            if (response.ok) {
-                setStudents(students.filter((student) => student.id !== id));
-            }
-        } catch (error) {
-            console.error("Error deleting student:", error);
-        }
+        deleteStudent(id);
     };
 
     const handleChange = async (id: string) => {
-        try {
-            const response = await fetch(serverPath + `/api/students/${id}`, {
-                method: "PUT",
-            });
-            if (response.ok) {
-                const newStudent = await response.json();
-                setStudents(newStudent);
-            }
-        } catch (error) {
-            console.error("Error changing student status:", error);
-        }
+        updateStudent(id);
     }
 
     return (
@@ -66,7 +27,7 @@ export default function StudentTable() {
                     </tr>
                 </thead>
                 <tbody>
-                    {students.map((student) => (
+                    {students.map((student: any) => (
                         <tr key={student.id}>
                             <td className="px-4 py-3 text-left">{student.id}</td>
                             <td className="px-4 py-3 text-center">{student.name}</td>
