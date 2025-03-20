@@ -6,6 +6,8 @@ import StudentTable from "@/components/StudentTable";
 import FilterSection from "@/components/FilterSection";
 import AddStudentButton from "@/components/AddStudentButton";
 import ManageOptionsButton from "@/components/ManageOptionsButton";
+import ExportButton from "@/components/ExportButton";
+import ImportButton from "@/components/ImportButton";
 
 interface Department {
   id: number;
@@ -127,6 +129,8 @@ export default function Home() {
       <div className="flex justify-between mb-4">
         <FilterSection onSearch={handleSearch} />
         <AddStudentButton onStudentAdded={handleStudentAdded} />
+        <ExportButton />
+        <ImportButton onOptionsUpdated={handleOptionsUpdated}/>
         <ManageOptionsButton onOptionsUpdated={handleOptionsUpdated} />
       </div>
       <StudentTable
