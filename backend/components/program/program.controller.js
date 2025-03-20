@@ -49,10 +49,7 @@ const getProgram = async (req, res) => {
       return res.status(404).json({ message: 'Program not found' });
     }
 
-    return res.status(200).json({
-      message: 'Program retrieved successfully',
-      data: program
-    });
+    return res.status(200).json(program);
   } catch (error) {
     return res.status(500).json({
       message: 'Error retrieving program',

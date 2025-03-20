@@ -49,10 +49,7 @@ const getStatus = async (req, res) => {
       return res.status(404).json({ message: 'Status not found' });
     }
 
-    return res.status(200).json({
-      message: 'Status retrieved successfully',
-      data: status
-    });
+    return res.status(200).json(status);
   } catch (error) {
     return res.status(500).json({
       message: 'Error retrieving status',

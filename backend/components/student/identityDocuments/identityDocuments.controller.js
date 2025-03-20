@@ -53,10 +53,7 @@ const getIdentityDocument = async (req, res) => {
       });
     }
 
-    return res.status(200).json({
-      message: 'Identity document retrieved successfully',
-      data: identityDocument
-    });
+    return res.status(200).json(identityDocument);
   } catch (error) {
     return res.status(500).json({
       message: 'Error retrieving identity document',
@@ -70,7 +67,7 @@ const getIdentityDocumentsByStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
 
-    const identityDocuments = await IdentityDocuments.findAll({
+    const identityDocuments = await IdentityDocuments.findOne({
       where: { studentId }
     });
 
@@ -80,10 +77,7 @@ const getIdentityDocumentsByStudent = async (req, res) => {
       });
     }
 
-    return res.status(200).json({
-      message: 'Identity documents retrieved successfully',
-      data: identityDocuments
-    });
+    return res.status(200).json(identityDocuments);
   } catch (error) {
     return res.status(500).json({
       message: 'Error retrieving identity documents',

@@ -49,10 +49,7 @@ const getDepartment = async (req, res) => {
       return res.status(404).json({ message: 'Department not found' });
     }
 
-    return res.status(200).json({
-      message: 'Department retrieved successfully',
-      data: department
-    });
+    return res.status(200).json(department);
   } catch (error) {
     return res.status(500).json({
       message: 'Error retrieving department',

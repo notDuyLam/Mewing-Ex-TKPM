@@ -55,10 +55,7 @@ const getStudentDetails = async (req, res) => {
       });
     }
 
-    return res.status(200).json({
-      message: 'Student details retrieved successfully',
-      data: studentDetails
-    });
+    return res.status(200).json(studentDetails);
   } catch (error) {
     return res.status(500).json({
       message: 'Error retrieving student details',

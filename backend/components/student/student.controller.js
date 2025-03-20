@@ -3,6 +3,8 @@ const Student = db.Student;
 const Department = db.Department;
 const Status = db.Status;
 const Program = db.Program;
+const StudentDetails = db.StudentDetails;
+const IdentityDocuments = db.IdentityDocuments;
 
 const { Op } = require('sequelize');
 
@@ -14,7 +16,8 @@ const logger = require('../../log/logger');
 
 const getStudentById = async (req, res) => {
     try {
-      const student = await Student.findByPk(req.params.studentId);
+      const studentId = req.params.studentId;
+      const student = await Student.findByPk(studentId);
       if (!student) {
         logger.warn('Student not found', { studentId });
         return res.status(404).json({ error: 'Student not found' });
@@ -28,31 +31,43 @@ const getStudentById = async (req, res) => {
 };
 
 const createStudent = async (req, res) => {
-    try {
+  try {
+      const { studentId, fullName, dateOfBirth, gender, departmentId, course, programId, email, phoneNumber, statusId } = req.body;
+
+      // Kiểm tra xem studentId đã tồn tại chưa
+      const existingStudent = await Student.findOne({ where: { studentId } });
+
+      if (existingStudent) {
+          logger.warn('Student ID already exists', { studentId });
+          return res.status(409).json({ error: 'Student ID already exists' });
+      }
+
       const studentData = {
-        studentId: req.body.studentId,
-        fullName: req.body.fullName,
-        dateOfBirth: req.body.dateOfBirth,
-        gender: req.body.gender,
-        departmentId: req.body.departmentId,
-        course: req.body.course,
-        programId: req.body.programId,
-        email: req.body.email,
-        phoneNumber: req.body.phoneNumber,
-        statusId: req.body.statusId
+          studentId,
+          fullName,
+          dateOfBirth,
+          gender,
+          departmentId,
+          course,
+          programId,
+          email,
+          phoneNumber,
+          statusId
       };
-  
+
       const student = await Student.create(studentData);
       logger.info('Student created', { studentId, fullName, user: req.user?.id || 'unknown' });
+
       res.status(201).json(student);
-    } catch (error) {
+  } catch (error) {
       logger.error('Error creating student', { error: error.message, studentId: req.body.studentId });
       res.status(400).json({ error: 'Bad request', details: error.message });
-    }
+  }
 };
 
 const updateStudent = async (req, res) => {
     try {
+      const studentId = req.params.studentId;
       const student = await Student.findByPk(req.params.studentId);
       if (!student) {
         logger.warn('Student not found for update', { studentId });
@@ -112,7 +127,7 @@ const searchStudents = async (req, res) => {
     }
 
     if (fullName) {
-      where.fullName = { [Op.like]: `%${fullName}%` }; // Tìm kiếm gần đúng theo tên
+      where.fullName = { [Op.iLike]: `%${fullName}%` }; // Tìm kiếm gần đúng theo tên
     }
 
     if (studentId) {
@@ -129,7 +144,8 @@ const searchStudents = async (req, res) => {
         { model: Program, as: 'program' }
       ],
       limit: limitNum,
-      offset: offset
+      offset: offset,
+      order: [['studentId', 'ASC']]
     });
 
     if (!students || students.length === 0) {
@@ -161,7 +177,6 @@ const searchStudents = async (req, res) => {
     });
   }
 };
-
 // Export dữ liệu sang CSV
 const exportToCSV = async (req, res) => {
   try {
@@ -169,9 +184,20 @@ const exportToCSV = async (req, res) => {
       include: [
         { model: Department, as: 'department' },
         { model: Status, as: 'status' },
-        { model: Program, as: 'program' }
-      ]
+        { model: Program, as: 'program' },
+        { model: StudentDetails, as: 'details' },
+        { model: IdentityDocuments, as: 'identityDocuments' },
+      ],
+      order: [['studentId', 'ASC']]
     });
+
+    students.map(student => {
+      if(student.identityDocuments) {
+        student.identityDocuments = student.identityDocuments[0];
+      }
+      return student;
+    })
+
 
     const data = students.map(student => ({
       studentId: student.studentId,
@@ -182,7 +208,23 @@ const exportToCSV = async (req, res) => {
       phoneNumber: student.phoneNumber,
       department: student.department ? student.department.name : null,
       status: student.status ? student.status.name : null,
-      program: student.program ? student.program.name : null
+      program: student.program ? student.program.name : null,
+      permanentAddressHouse: student.details ? student.details.permanentAddressHouse : null,
+      permanentAddressWard: student.details ? student.details.permanentAddressWard : null,
+      permanentAddressDistrict: student.details ? student.details.permanentAddressDistrict : null,
+      permanentAddressCity: student.details ? student.details.permanentAddressCity : null,
+      permanentAddressCountry: student.details ? student.details.permanentAddressCountry : null,
+      temporaryAddress: student.details ? student.details.temporaryAddress : null,
+      mailingAddress: student.details ? student.details.mailingAddress : null,
+      nationality: student.details ? student.details.nationality : null,
+      identityType: student.identityDocuments ? student.identityDocuments.identityType : null,
+      identityNumber: student.identityDocuments ? student.identityDocuments.identityNumber : null,
+      issueDate: student.identityDocuments && student.identityDocuments.issueDate ? student.identityDocuments.issueDate.toISOString().split('T')[0] : null,
+      issuePlace: student.identityDocuments ? student.identityDocuments.issuePlace : null,
+      expiryDate: student.identityDocuments && student.identityDocuments.expiryDate ? student.identityDocuments.expiryDate.toISOString().split('T')[0] : null,
+      chipAttached: student.identityDocuments ? student.identityDocuments.chipAttached : null,
+      issuingCountry: student.identityDocuments ? student.identityDocuments.issuingCountry : null,
+      note: student.identityDocuments ? student.identityDocuments.note : null,
     }));
 
     const csv = stringify(data, { header: true });
@@ -205,9 +247,18 @@ const exportToExcel = async (req, res) => {
       include: [
         { model: Department, as: 'department' },
         { model: Status, as: 'status' },
-        { model: Program, as: 'program' }
-      ]
+        { model: Program, as: 'program' },
+        { model: StudentDetails, as: 'details' },
+        { model: IdentityDocuments, as: 'identityDocuments' },
+      ],
     });
+
+    students.map(student => {
+      if(student.identityDocuments) {
+        student.identityDocuments = student.identityDocuments[0];
+      }
+      return student;
+    })
 
     const data = students.map(student => ({
       'Student ID': student.studentId,
@@ -218,7 +269,23 @@ const exportToExcel = async (req, res) => {
       'Phone Number': student.phoneNumber,
       'Department': student.department ? student.department.name : null,
       'Status': student.status ? student.status.name : null,
-      'Program': student.program ? student.program.name : null
+      'Program': student.program ? student.program.name : null,
+      'Permanent Address House': student.details ? student.details.permanentAddressHouse : null,
+      'Permanent Address Ward': student.details ? student.details.permanentAddressWard : null,
+      'Permanent Address District': student.details ? student.details.permanentAddressDistrict : null,
+      'Permanent Address City': student.details ? student.details.permanentAddressCity : null,
+      'Permanent Address Country': student.details ? student.details.permanentAddressCountry : null,
+      'Temporary Address': student.details ? student.details.temporaryAddress : null,
+      'Mailing Address': student.details ? student.details.mailingAddress : null,
+      'Nationality': student.details ? student.details.nationality : null,
+      'Identity Type': student.identityDocuments ? student.identityDocuments.identityType : null,
+      'Identity Number': student.identityDocuments ? student.identityDocuments.identityNumber : null,
+      'Issue Date': student.identityDocuments && student.identityDocuments.issueDate ? student.identityDocuments.issueDate.toISOString().split('T')[0] : null,
+      'Issue Place': student.identityDocuments ? student.identityDocuments.issuePlace : null,
+      'Expiry Date': student.identityDocuments && student.identityDocuments.expiryDate ? student.identityDocuments.expiryDate.toISOString().split('T')[0] : null,
+      'Chip Attached': student.identityDocuments ? student.identityDocuments.chipAttached : null,
+      'Issuing Country': student.identityDocuments ? student.identityDocuments.issuingCountry : null,
+      'Note': student.identityDocuments ? student.identityDocuments.note : null,
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);
@@ -238,7 +305,7 @@ const exportToExcel = async (req, res) => {
   }
 };
 
-// Import dữ liệu từ file (CSV hoặc Excel)
+// Import dữ liệu từ file
 const importFromFile = async (req, res) => {
   try {
     if (!req.file) {
@@ -250,10 +317,8 @@ const importFromFile = async (req, res) => {
     let studentsData;
 
     if (file.mimetype === 'text/csv') {
-      // Xử lý file CSV
       studentsData = parse(file.buffer.toString(), { columns: true, trim: true });
     } else if (file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-      // Xử lý file Excel
       const wb = XLSX.read(file.buffer, { type: 'buffer' });
       const ws = wb.Sheets[wb.SheetNames[0]];
       studentsData = XLSX.utils.sheet_to_json(ws);
@@ -282,14 +347,48 @@ const importFromFile = async (req, res) => {
         phoneNumber: student.phoneNumber || student['Phone Number'] || null,
         departmentId: departmentMap.get(student.department || student['Department']) || null,
         statusId: statusMap.get(student.status || student['Status']) || null,
-        programId: programMap.get(student.program || student['Program']) || null
+        programId: programMap.get(student.program || student['Program']) || null,
+      };
+
+      const detailsData = {
+        studentId: studentData.studentId,
+        permanentAddressHouse: student.permanentAddressHouse || student['Permanent Address House'] || null,
+        permanentAddressWard: student.permanentAddressWard || student['Permanent Address Ward'] || null,
+        permanentAddressDistrict: student.permanentAddressDistrict || student['Permanent Address District'] || null,
+        permanentAddressCity: student.permanentAddressCity || student['Permanent Address City'] || null,
+        permanentAddressCountry: student.permanentAddressCountry || student['Permanent Address Country'] || null,
+        temporaryAddress: student.temporaryAddress || student['Temporary Address'] || null,
+        mailingAddress: student.mailingAddress || student['Mailing Address'] || null,
+        nationality: student.nationality || student['Nationality'] || null,
+      };
+
+      const identityData = {
+        studentId: studentData.studentId,
+        identityType: student.identityType || student['Identity Type'] || null,
+        identityNumber: student.identityNumber || student['Identity Number'] || null,
+        issueDate: student.issueDate || student['Issue Date'] || null,
+        issuePlace: student.issuePlace || student['Issue Place'] || null,
+        expiryDate: student.expiryDate || student['Expiry Date'] || null,
+        chipAttached: student.chipAttached || student['Chip Attached'] || null,
+        issuingCountry: student.issuingCountry || student['Issuing Country'] || null,
+        note: student.note || student['Note'] || null,
       };
 
       // Thêm hoặc cập nhật sinh viên
       await Student.upsert(studentData);
+
+      // Thêm hoặc cập nhật StudentDetails nếu có dữ liệu
+      if (Object.values(detailsData).some(val => val !== null && val !== '')) {
+        await StudentDetails.upsert(detailsData);
+      }
+
+      // Thêm hoặc cập nhật IdentityDocuments nếu có identityType
+      if (identityData.identityType) {
+        await IdentityDocuments.upsert(identityData);
+      }
     }
 
-    logger.info('Students import completed', { totalRecords: validStudents.length, user: req.user?.id || 'unknown' });
+    logger.info('Students import completed', { totalRecords: studentsData.length, user: req.user?.id || 'unknown' });
     return res.status(200).json({ message: 'Students imported successfully' });
   } catch (error) {
     logger.error('Error importing students', { error: error.message, file: req.file?.originalname });
