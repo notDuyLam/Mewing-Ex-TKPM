@@ -11,14 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Student.hasOne(models.StudentDetails, {
-        foreignKey: 'studentId',
-        as: 'details'
-      });
-      Student.hasMany(models.IdentityDocuments, {
-        foreignKey: 'studentId',
-        as: 'identityDocuments'
-      });
+      Student.belongsTo(models.Department, { foreignKey: 'departmentId', as: 'department' });
+      Student.belongsTo(models.Status, { foreignKey: 'statusId', as: 'status' });
+      Student.belongsTo(models.Program, { foreignKey: 'programId', as: 'program' });
+      Student.hasOne(models.StudentDetails, { foreignKey: 'studentId', as: 'details' });
+      Student.hasMany(models.IdentityDocuments, { foreignKey: 'studentId', as: 'identityDocuments' });
     }
   }
   Student.init({
@@ -27,15 +24,38 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       allowNull: false
     },
-    fullName: DataTypes.STRING,
-    dateOfBirth: DataTypes.DATE,
-    gender: DataTypes.STRING,
-    department: DataTypes.STRING,
-    course: DataTypes.STRING,
-    program: DataTypes.STRING,
-    email: DataTypes.STRING,
-    phoneNumber: DataTypes.STRING,
-    status: DataTypes.STRING
+    fullName: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    dateOfBirth: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    gender: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    phoneNumber: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    departmentId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    statusId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    programId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    }
   }, {
     sequelize,
     modelName: 'Student',
