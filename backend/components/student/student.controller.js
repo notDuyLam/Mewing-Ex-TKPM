@@ -10,42 +10,6 @@ const { parse } = require('csv-parse/sync');
 const { stringify } = require('csv-stringify/sync');
 const XLSX = require('xlsx');
 
-const studentSchema = Joi.object({
-  studentId: Joi.string().required().max(50).messages({
-    'string.base': 'Student ID must be a string',
-    'string.empty': 'Student ID is required',
-    'any.required': 'Student ID is required'
-  }),
-  fullName: Joi.string().required().max(100).messages({
-    'string.base': 'Full Name must be a string',
-    'string.empty': 'Full Name is required',
-    'any.required': 'Full Name is required'
-  }),
-  dateOfBirth: Joi.date().iso().allow(null).messages({
-    'date.base': 'Date of Birth must be a valid date (YYYY-MM-DD)',
-    'date.format': 'Date of Birth must be in ISO format (YYYY-MM-DD)'
-  }),
-  gender: Joi.string().valid('Male', 'Female', 'Other').allow(null).messages({
-    'string.base': 'Gender must be a string',
-    'any.only': 'Gender must be Male, Female, or Other'
-  }),
-  email: Joi.string().email().allow(null).messages({
-    'string.email': 'Email must be a valid email address'
-  }),
-  phoneNumber: Joi.string().pattern(/^[0-9]{9,15}$/).allow(null).messages({
-    'string.pattern.base': 'Phone Number must be 9-15 digits'
-  }),
-  departmentId: Joi.number().integer().allow(null).messages({
-    'number.base': 'Department ID must be a number'
-  }),
-  statusId: Joi.number().integer().allow(null).messages({
-    'number.base': 'Status ID must be a number'
-  }),
-  programId: Joi.number().integer().allow(null).messages({
-    'number.base': 'Program ID must be a number'
-  })
-});
-
 const getAllStudents = async (req, res) => {
     try {
         const students = await Student.findAll({
