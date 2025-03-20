@@ -29,12 +29,12 @@ const createStudent = async (req, res) => {
         fullName: req.body.fullName,
         dateOfBirth: req.body.dateOfBirth,
         gender: req.body.gender,
-        department: req.body.department,
+        departmentId: req.body.departmentId,
         course: req.body.course,
-        program: req.body.program,
+        programId: req.body.programId,
         email: req.body.email,
         phoneNumber: req.body.phoneNumber,
-        status: req.body.status
+        statusId: req.body.statusId
       };
   
       const student = await Student.create(studentData);
@@ -55,13 +55,12 @@ const updateStudent = async (req, res) => {
         fullName: req.body.fullName || student.fullName,
         dateOfBirth: req.body.dateOfBirth || student.dateOfBirth,
         gender: req.body.gender || student.gender,
-        department: req.body.department || student.department,
+        departmentId: req.body.departmentId || student.departmentId,
         course: req.body.course || student.course,
-        program: req.body.program || student.program,
-        address: req.body.address !== undefined ? req.body.address : student.address,
+        programId: req.body.programId || student.programId,
         email: req.body.email || student.email,
         phoneNumber: req.body.phoneNumber || student.phoneNumber,
-        status: req.body.status || student.status
+        statusId: req.body.statusId || student.statusId
       };
   
       await student.update(updatedData);

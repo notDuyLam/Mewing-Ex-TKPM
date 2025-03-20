@@ -16,6 +16,13 @@ app.use('/student-details', require('./components/student/studentDetails/student
 // routing for indentiy documents
 app.use('/identity-documents', require('./components/student/identityDocuments/identityDocuments.routes'));
 
+// routing for departments
+app.use('/departments', require('./components/department/department.routes'));
+// routing for programs
+app.use('/programs', require('./components/program/program.routes'));
+// routing for statuses
+app.use('/statuses', require('./components/status/status.routes'));
+
 const PORT = process.env.PORT || 3000;
 
 db.sequelize.sync().then(() => {
