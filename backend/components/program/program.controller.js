@@ -29,10 +29,7 @@ const getAllPrograms = async (req, res) => {
   try {
     const programs = await Program.findAll();
 
-    return res.status(200).json({
-      message: 'Programs retrieved successfully',
-      data: programs
-    });
+    return res.status(200).json(programs);
   } catch (error) {
     return res.status(500).json({
       message: 'Error retrieving programs',

@@ -29,10 +29,7 @@ const getAllDepartments = async (req, res) => {
   try {
     const departments = await Department.findAll();
 
-    return res.status(200).json({
-      message: 'Departments retrieved successfully',
-      data: departments
-    });
+    return res.status(200).json(departments);
   } catch (error) {
     return res.status(500).json({
       message: 'Error retrieving departments',

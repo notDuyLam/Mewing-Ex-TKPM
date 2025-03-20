@@ -29,10 +29,7 @@ const getAllStatuses = async (req, res) => {
   try {
     const statuses = await Status.findAll();
 
-    return res.status(200).json({
-      message: 'Statuses retrieved successfully',
-      data: statuses
-    });
+    return res.status(200).json(statuses);
   } catch (error) {
     return res.status(500).json({
       message: 'Error retrieving statuses',
