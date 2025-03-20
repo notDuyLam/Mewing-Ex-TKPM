@@ -10,29 +10,19 @@ const { parse } = require('csv-parse/sync');
 const { stringify } = require('csv-stringify/sync');
 const XLSX = require('xlsx');
 
-const getAllStudents = async (req, res) => {
-    try {
-        const students = await Student.findAll({
-          include: [
-            { model: Department, as: 'department' },
-            { model: Status, as: 'status' },
-            { model: Program, as: 'program' }
-          ]
-        });
-        res.status(200).json(students);
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error', details: error.message });
-    }
-};
+const logger = require('../../log/logger');
 
 const getStudentById = async (req, res) => {
     try {
       const student = await Student.findByPk(req.params.studentId);
       if (!student) {
+        logger.warn('Student not found', { studentId });
         return res.status(404).json({ error: 'Student not found' });
       }
+      logger.info('Student retrieved', { studentId });
       res.status(200).json(student);
     } catch (error) {
+      logger.error('Error retrieving student', { error: error.message, studentId: req.params.studentId });
       res.status(500).json({ error: 'Internal server error', details: error.message });
     }
 };
@@ -53,8 +43,10 @@ const createStudent = async (req, res) => {
       };
   
       const student = await Student.create(studentData);
+      logger.info('Student created', { studentId, fullName, user: req.user?.id || 'unknown' });
       res.status(201).json(student);
     } catch (error) {
+      logger.error('Error creating student', { error: error.message, studentId: req.body.studentId });
       res.status(400).json({ error: 'Bad request', details: error.message });
     }
 };
@@ -63,6 +55,7 @@ const updateStudent = async (req, res) => {
     try {
       const student = await Student.findByPk(req.params.studentId);
       if (!student) {
+        logger.warn('Student not found for update', { studentId });
         return res.status(404).json({ error: 'Student not found' });
       }
   
@@ -79,8 +72,10 @@ const updateStudent = async (req, res) => {
       };
   
       await student.update(updatedData);
+      logger.info('Student updated', { studentId, updatedFields: req.body, user: req.user?.id || 'unknown' });
       res.status(200).json(student);
     } catch (error) {
+      logger.error('Error updating student', { error: error.message, studentId: req.params.studentId });
       res.status(400).json({ error: 'Bad request', details: error.message });
     }
 };
@@ -89,11 +84,14 @@ const deleteStudent = async (req, res) => {
     try {
       const student = await Student.findByPk(req.params.studentId);
       if (!student) {
+        logger.warn('Student not found for deletion', { studentId });
         return res.status(404).json({ error: 'Student not found' });
       }
       await student.destroy();
+      logger.info('Student deleted', { studentId, user: req.user?.id || 'unknown' });
       res.status(204).send();
     } catch (error) {
+      logger.error('Error deleting student', { error: error.message, studentId: req.params.studentId });
       res.status(500).json({ error: 'Internal server error', details: error.message });
     }
 };
@@ -135,12 +133,15 @@ const searchStudents = async (req, res) => {
     });
 
     if (!students || students.length === 0) {
+      logger.warn('No students found in search', { filters: req.query });
       return res.status(404).json({
         message: 'No students found matching the criteria'
       });
     }
 
     const totalPages = Math.ceil(totalRecords / limitNum);
+
+    logger.info('Students retrieved', { filters: req.query, totalRecords });
 
     return res.status(200).json({
       message: 'Students retrieved successfully',
@@ -153,6 +154,7 @@ const searchStudents = async (req, res) => {
       }
     });
   } catch (error) {
+    logger.error('Error searching students', { error: error.message, filters: req.query });
     return res.status(500).json({
       message: 'Error searching students',
       error: error.message
@@ -185,10 +187,13 @@ const exportToCSV = async (req, res) => {
 
     const csv = stringify(data, { header: true });
 
+    logger.info('Students exported to CSV', { recordCount: students.length, user: req.user?.id || 'unknown' });
+
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="students.csv"');
     return res.status(200).send(csv);
   } catch (error) {
+    logger.error('Error exporting to CSV', { error: error.message });
     return res.status(500).json({ error: 'Error exporting to CSV: ' + error.message });
   }
 };
@@ -222,10 +227,13 @@ const exportToExcel = async (req, res) => {
 
     const buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
 
+    logger.info('Students exported to Excel', { recordCount: students.length, user: req.user?.id || 'unknown' });
+
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename="students.xlsx"');
     return res.status(200).send(buffer);
   } catch (error) {
+    logger.error('Error exporting to Excel', { error: error.message });
     return res.status(500).json({ error: 'Error exporting to Excel: ' + error.message });
   }
 };
@@ -234,6 +242,7 @@ const exportToExcel = async (req, res) => {
 const importFromFile = async (req, res) => {
   try {
     if (!req.file) {
+      logger.warn('No file uploaded for import');
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
@@ -249,6 +258,7 @@ const importFromFile = async (req, res) => {
       const ws = wb.Sheets[wb.SheetNames[0]];
       studentsData = XLSX.utils.sheet_to_json(ws);
     } else {
+      logger.warn('Unsupported file format for import', { mimetype: file.mimetype });
       return res.status(400).json({ error: 'Unsupported file format' });
     }
 
@@ -279,14 +289,15 @@ const importFromFile = async (req, res) => {
       await Student.upsert(studentData);
     }
 
+    logger.info('Students import completed', { totalRecords: validStudents.length, user: req.user?.id || 'unknown' });
     return res.status(200).json({ message: 'Students imported successfully' });
   } catch (error) {
+    logger.error('Error importing students', { error: error.message, file: req.file?.originalname });
     return res.status(500).json({ error: 'Error importing students: ' + error.message });
   }
 };
 
 module.exports = {
-    getAllStudents,
     getStudentById,
     createStudent,
     updateStudent,
