@@ -6,6 +6,7 @@ import StudentTable from "@/components/StudentTable";
 import FilterSection from "@/components/FilterSection";
 import AddStudentButton from "@/components/AddStudentButton";
 import { Toaster } from "@/components/ui/sonner";
+import ManageOptionsButton from "@/components/ManageOptionsButton";
 
 interface Department {
   id: number;
@@ -117,6 +118,10 @@ export default function Home() {
     fetchStudents(pagination.currentPage, filters); // Làm mới danh sách sau khi thêm
   };
 
+  const handleOptionsUpdated = () => {
+    fetchStudents(pagination.currentPage, filters); // Làm mới danh sách sinh viên khi tùy chọn thay đổi
+  };
+
   return (
     <div className="container mx-auto p-4">
       <Toaster />
@@ -124,6 +129,7 @@ export default function Home() {
       <div className="flex justify-between mb-4">
         <FilterSection onSearch={handleSearch} />
         <AddStudentButton onStudentAdded={handleStudentAdded} />
+        <ManageOptionsButton onOptionsUpdated={handleOptionsUpdated} />
       </div>
       <StudentTable
         students={students}
