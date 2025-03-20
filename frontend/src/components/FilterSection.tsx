@@ -21,7 +21,7 @@ export default function FilterSection({ onSearch }: FilterSectionProps) {
     departmentId: "",
   });
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [isFetching, setIsFetching] = useState(false); // Loading cho tìm kiếm
+  const [isFetching, setIsFetching] = useState(false);
 
   const fetchDepartments = async () => {
     try {
@@ -44,7 +44,7 @@ export default function FilterSection({ onSearch }: FilterSectionProps) {
   const handleSearch = () => {
     setIsFetching(true);
     onSearch(filters);
-    setTimeout(() => setIsFetching(false), 500); // Giả lập loading ngắn
+    setTimeout(() => setIsFetching(false), 500); // Giả lập loading
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -55,10 +55,11 @@ export default function FilterSection({ onSearch }: FilterSectionProps) {
 
   const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newDepartmentId = e.target.value;
-    setFilters({ ...filters, departmentId: newDepartmentId });
+    const newFilters = { ...filters, departmentId: newDepartmentId };
+    setFilters(newFilters);
     setIsFetching(true);
-    onSearch({ ...filters, departmentId: newDepartmentId });
-    setTimeout(() => setIsFetching(false), 500); // Giả lập loading ngắn
+    onSearch(newFilters);
+    setTimeout(() => setIsFetching(false), 500); // Giả lập loading
   };
 
   return (

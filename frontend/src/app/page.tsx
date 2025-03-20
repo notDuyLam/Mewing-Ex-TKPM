@@ -48,23 +48,40 @@ interface ApiResponse {
 
 export default function Home() {
   const [students, setStudents] = useState<Student[]>([]);
+  const [pagination, setPagination] = useState({
+    totalRecords: 0,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+  });
+  const [filters, setFilters] = useState({
+    fullName: "",
+    studentId: "",
+    departmentId: "",
+  });
 
-  const fetchStudents = async (filters = { fullName: "", studentId: "", departmentId: "" }) => {
+  const fetchStudents = async (
+    page: number = 1,
+    filterParams = { fullName: "", studentId: "", departmentId: "" }
+  ) => {
     try {
       const query = new URLSearchParams({
-        ...(filters.fullName && { fullName: filters.fullName }),
-        ...(filters.studentId && { studentId: filters.studentId }),
-        ...(filters.departmentId && { departmentId: filters.departmentId }),
+        page: page.toString(),
+        limit: pagination.pageSize.toString(),
+        ...(filterParams.fullName && { fullName: filterParams.fullName }),
+        ...(filterParams.studentId && { studentId: filterParams.studentId }),
+        ...(filterParams.departmentId && { departmentId: filterParams.departmentId }),
       }).toString();
 
-      const res = await fetch(`http://localhost:3000/students${query ? `?${query}` : ""}`, {
+      const res = await fetch(`http://localhost:3000/students?${query}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
 
       if (res.status === 404) {
-        setStudents([]);
-        return; // Giữ nguyên dữ liệu cũ
+        setStudents([]); // Không tìm thấy thì trả về trống
+        setPagination({ ...pagination, totalPages: 1, currentPage: page });
+        return;
       }
 
       if (!res.ok) {
@@ -73,24 +90,38 @@ export default function Home() {
 
       const data: ApiResponse = await res.json();
       setStudents(data.data);
+      setPagination(data.pagination);
     } catch (error) {
       console.error("Error fetching students:", error);
+      setStudents([]);
+      setPagination({ ...pagination, totalPages: 1, currentPage: page });
     }
   };
 
   useEffect(() => {
-    fetchStudents(); // Lấy toàn bộ danh sách khi load lần đầu
+    fetchStudents(pagination.currentPage, filters); // Lấy dữ liệu lần đầu
   }, []);
 
-  const handleSearch = (filters: { fullName: string; studentId: string; departmentId: string }) => {
-    fetchStudents(filters); // Không set loading để tránh nhấp nháy
+  const handleSearch = (newFilters: { fullName: string; studentId: string; departmentId: string }) => {
+    setFilters(newFilters); // Lưu filters mới
+    fetchStudents(1, newFilters); // Tìm kiếm từ trang 1
+  };
+
+  const handlePageChange = (page: number) => {
+    fetchStudents(page, filters); // Gọi API với trang mới, giữ filters hiện tại
   };
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Danh sách Sinh viên</h1>
       <FilterSection onSearch={handleSearch} />
-      <StudentTable students={students} />
+      <StudentTable
+        students={students}
+        totalPages={pagination.totalPages}
+        currentPage={pagination.currentPage}
+        pageSize={pagination.pageSize}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 }
