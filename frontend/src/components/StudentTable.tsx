@@ -15,6 +15,8 @@ import {
     PaginationNext,
     PaginationPrevious,
   } from "@/components/ui/pagination";
+
+  import Link from "next/link";
   
   interface Department {
     id: number;
@@ -90,7 +92,11 @@ import {
               students.map((student) => (
                 <TableRow key={student.studentId}>
                   <TableCell>{student.studentId}</TableCell>
-                  <TableCell>{student.fullName}</TableCell>
+                  <TableCell>
+                    <Link className="text-gray-800 underline" href={`/students/${student.studentId}`}>
+                    {student.fullName}
+                    </Link>
+                  </TableCell>
                   <TableCell>
                     {new Date(student.dateOfBirth).toLocaleDateString("vi-VN")}
                   </TableCell>

@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Department {
   id: number;
@@ -38,7 +39,31 @@ interface Student {
   departmentId: number;
   statusId: number;
   programId: number;
-  course: string; // Thêm trường course
+  course: string;
+}
+
+interface StudentDetails {
+  studentId: string;
+  permanentAddressHouse: string;
+  permanentAddressWard: string;
+  permanentAddressDistrict: string;
+  permanentAddressCity: string;
+  permanentAddressCountry: string;
+  temporaryAddress: string;
+  mailingAddress: string;
+  nationality: string;
+}
+
+interface IdentityDocuments {
+  studentId: string;
+  identityType: string;
+  identityNumber: string;
+  issueDate: string;
+  issuePlace: string;
+  expiryDate: string;
+  chipAttached: boolean;
+  issuingCountry: string;
+  note: string;
 }
 
 interface AddStudentButtonProps {
@@ -54,10 +79,32 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
     gender: "",
     email: "",
     phoneNumber: "",
-    departmentId: 1,
-    statusId: 1,
-    programId: 1,
+    departmentId: 0,
+    statusId: 0,
+    programId: 0,
     course: "",
+  });
+  const [newStudentDetails, setNewStudentDetails] = useState<StudentDetails>({
+    studentId: "",
+    permanentAddressHouse: "",
+    permanentAddressWard: "",
+    permanentAddressDistrict: "",
+    permanentAddressCity: "",
+    permanentAddressCountry: "",
+    temporaryAddress: "",
+    mailingAddress: "",
+    nationality: "",
+  });
+  const [newIdentityDocuments, setNewIdentityDocuments] = useState<IdentityDocuments>({
+    studentId: "",
+    identityType: "",
+    identityNumber: "",
+    issueDate: "",
+    issuePlace: "",
+    expiryDate: "",
+    chipAttached: false,
+    issuingCountry: "",
+    note: "",
   });
   const [departments, setDepartments] = useState<Department[]>([]);
   const [statuses, setStatuses] = useState<Status[]>([]);
@@ -93,7 +140,6 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
   }, []);
 
   const validateForm = (): boolean => {
-    // Kiểm tra rỗng
     if (!newStudent.studentId.trim()) {
       toast.error("Mã sinh viên không được để trống");
       return false;
@@ -135,7 +181,6 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
       return false;
     }
 
-    // Kiểm tra định dạng
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newStudent.email)) {
       toast.error("Email không đúng định dạng");
@@ -148,26 +193,69 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
       return false;
     }
 
+    // Validate IdentityDocuments
+    if (newIdentityDocuments.identityType) {
+      if (!newIdentityDocuments.identityNumber.trim()) {
+        toast.error("Số giấy tờ không được để trống");
+        return false;
+      }
+    }
+
     return true;
   };
 
   const handleAddStudent = async () => {
-    if (!validateForm()) return; // Kiểm tra validation trước khi gửi
+    if (!validateForm()) return;
 
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/students", {
+      // Tạo Student
+      const studentRes = await fetch("http://localhost:3000/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newStudent),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
+      if (!studentRes.ok) {
+        const errorData = await studentRes.json();
         toast.error(errorData.message || "Failed to add student");
         return;
       }
 
+      // Tạo StudentDetails
+      const studentDetailsData = { ...newStudentDetails, studentId: newStudent.studentId };
+      const detailsRes = await fetch("http://localhost:3000/student-details", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(studentDetailsData),
+      });
+
+      if (!detailsRes.ok) {
+        const errorData = await detailsRes.json();
+        toast.error(errorData.message || "Failed to add student details");
+        return;
+      }
+
+      // Tạo IdentityDocuments (nếu có dữ liệu)
+      if (newIdentityDocuments.identityType) {
+        const identityDocumentsData = {
+          ...newIdentityDocuments,
+          studentId: newStudent.studentId,
+        };
+        const identityRes = await fetch("http://localhost:3000/identity-documents", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(identityDocumentsData),
+        });
+
+        if (!identityRes.ok) {
+          const errorData = await identityRes.json();
+          toast.error(errorData.message || "Failed to add identity documents");
+          return;
+        }
+      }
+
+      // Reset form
       setNewStudent({
         studentId: "",
         fullName: "",
@@ -175,10 +263,32 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
         gender: "",
         email: "",
         phoneNumber: "",
-        departmentId: 1,
-        statusId: 1,
-        programId: 1,
+        departmentId: 0,
+        statusId: 0,
+        programId: 0,
         course: "",
+      });
+      setNewStudentDetails({
+        studentId: "",
+        permanentAddressHouse: "",
+        permanentAddressWard: "",
+        permanentAddressDistrict: "",
+        permanentAddressCity: "",
+        permanentAddressCountry: "",
+        temporaryAddress: "",
+        mailingAddress: "",
+        nationality: "",
+      });
+      setNewIdentityDocuments({
+        studentId: "",
+        identityType: "",
+        identityNumber: "",
+        issueDate: "",
+        issuePlace: "",
+        expiryDate: "",
+        chipAttached: false,
+        issuingCountry: "",
+        note: "",
       });
       setIsOpen(false);
       onStudentAdded();
@@ -195,105 +305,327 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
       <DialogTrigger asChild>
         <Button>Thêm Sinh viên</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-6xl">
         <DialogHeader>
           <DialogTitle>Thêm Sinh viên Mới</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <Input
-            placeholder="Mã sinh viên"
-            value={newStudent.studentId}
-            onChange={(e) => setNewStudent({ ...newStudent, studentId: e.target.value })}
-            disabled={isLoading}
-          />
-          <Input
-            placeholder="Họ tên"
-            value={newStudent.fullName}
-            onChange={(e) => setNewStudent({ ...newStudent, fullName: e.target.value })}
-            disabled={isLoading}
-          />
-          <Input
-            type="date"
-            value={newStudent.dateOfBirth}
-            onChange={(e) => setNewStudent({ ...newStudent, dateOfBirth: e.target.value })}
-            disabled={isLoading}
-          />
-          <select
-            value={newStudent.gender}
-            onChange={(e) => setNewStudent({ ...newStudent, gender: e.target.value })}
-            className="w-full p-2 border rounded"
-            disabled={isLoading}
-          >
-            <option value="">Chọn giới tính</option>
-            <option value="Nam">Nam</option>
-            <option value="Nữ">Nữ</option>
-          </select>
-          <Input
-            placeholder="Email"
-            value={newStudent.email}
-            onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
-            disabled={isLoading}
-          />
-          <Input
-            placeholder="Số điện thoại"
-            value={newStudent.phoneNumber}
-            onChange={(e) => setNewStudent({ ...newStudent, phoneNumber: e.target.value })}
-            disabled={isLoading}
-          />
-          <select
-            value={newStudent.departmentId}
-            onChange={(e) =>
-              setNewStudent({ ...newStudent, departmentId: Number(e.target.value) })
-            }
-            className="w-full p-2 border rounded"
-            disabled={isLoading || departments.length === 0}
-          >
-            <option value="">Chọn khoa</option>
-            {departments.map((dept) => (
-              <option key={dept.id} value={dept.id}>
-                {dept.name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={newStudent.statusId}
-            onChange={(e) =>
-              setNewStudent({ ...newStudent, statusId: Number(e.target.value) })
-            }
-            className="w-full p-2 border rounded"
-            disabled={isLoading || statuses.length === 0}
-          >
-            <option value="">Chọn trạng thái</option>
-            {statuses.map((status) => (
-              <option key={status.id} value={status.id}>
-                {status.name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={newStudent.programId}
-            onChange={(e) =>
-              setNewStudent({ ...newStudent, programId: Number(e.target.value) })
-            }
-            className="w-full p-2 border rounded"
-            disabled={isLoading || programs.length === 0}
-          >
-            <option value="">Chọn chương trình</option>
-            {programs.map((prog) => (
-              <option key={prog.id} value={prog.id}>
-                {prog.name}
-              </option>
-            ))}
-          </select>
-          <Input
-            placeholder="Khóa (ví dụ: K45)"
-            value={newStudent.course}
-            onChange={(e) => setNewStudent({ ...newStudent, course: e.target.value })}
-            disabled={isLoading}
-          />
-          <Button onClick={handleAddStudent} disabled={isLoading}>
-            {isLoading ? "Đang thêm..." : "Thêm"}
-          </Button>
+        <div className="grid grid-cols-3 gap-4">
+          {/* Cột 1: Thông tin Student */}
+          <div className="space-y-4">
+            <Input
+              placeholder="Mã sinh viên"
+              value={newStudent.studentId}
+              onChange={(e) => setNewStudent({ ...newStudent, studentId: e.target.value })}
+              disabled={isLoading}
+            />
+            <Input
+              placeholder="Họ tên"
+              value={newStudent.fullName}
+              onChange={(e) => setNewStudent({ ...newStudent, fullName: e.target.value })}
+              disabled={isLoading}
+            />
+            <div className="flex items-center space-x-2">
+              <label>Ngày sinh:</label>
+              <Input
+                className="w-auto"
+                type="date"
+                value={newStudent.dateOfBirth}
+                onChange={(e) => setNewStudent({ ...newStudent, dateOfBirth: e.target.value })}
+                disabled={isLoading}
+              />
+            </div>
+            <select
+              value={newStudent.gender}
+              onChange={(e) => setNewStudent({ ...newStudent, gender: e.target.value })}
+              className="w-full p-2 border rounded"
+              disabled={isLoading}
+            >
+              <option value="">Chọn giới tính</option>
+              <option value="Nam">Nam</option>
+              <option value="Nữ">Nữ</option>
+            </select>
+            <Input
+              placeholder="Email"
+              value={newStudent.email}
+              onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
+              disabled={isLoading}
+            />
+            <Input
+              placeholder="Số điện thoại"
+              value={newStudent.phoneNumber}
+              onChange={(e) => setNewStudent({ ...newStudent, phoneNumber: e.target.value })}
+              disabled={isLoading}
+            />
+            <select
+              value={newStudent.departmentId}
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, departmentId: Number(e.target.value) })
+              }
+              className="w-full p-2 border rounded"
+              disabled={isLoading || departments.length === 0}
+            >
+              <option value={0}>Chọn khoa</option>
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={newStudent.statusId}
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, statusId: Number(e.target.value) })
+              }
+              className="w-full p-2 border rounded"
+              disabled={isLoading || statuses.length === 0}
+            >
+              <option value={0}>Chọn trạng thái</option>
+              {statuses.map((status) => (
+                <option key={status.id} value={status.id}>
+                  {status.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={newStudent.programId}
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, programId: Number(e.target.value) })
+              }
+              className="w-full p-2 border rounded"
+              disabled={isLoading || programs.length === 0}
+            >
+              <option value={0}>Chọn chương trình</option>
+              {programs.map((prog) => (
+                <option key={prog.id} value={prog.id}>
+                  {prog.name}
+                </option>
+              ))}
+            </select>
+            <Input
+              placeholder="Khóa (ví dụ: K45)"
+              value={newStudent.course}
+              onChange={(e) => setNewStudent({ ...newStudent, course: e.target.value })}
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* Cột 2: Thông tin StudentDetails */}
+          <div className="space-y-4">
+            <Input
+              placeholder="Số nhà (Địa chỉ thường trú)"
+              value={newStudentDetails.permanentAddressHouse}
+              onChange={(e) =>
+                setNewStudentDetails({
+                  ...newStudentDetails,
+                  permanentAddressHouse: e.target.value,
+                })
+              }
+              disabled={isLoading}
+            />
+            <Input
+              placeholder="Phường/Xã (Địa chỉ thường trú)"
+              value={newStudentDetails.permanentAddressWard}
+              onChange={(e) =>
+                setNewStudentDetails({
+                  ...newStudentDetails,
+                  permanentAddressWard: e.target.value,
+                })
+              }
+              disabled={isLoading}
+            />
+            <Input
+              placeholder="Quận/Huyện (Địa chỉ thường trú)"
+              value={newStudentDetails.permanentAddressDistrict}
+              onChange={(e) =>
+                setNewStudentDetails({
+                  ...newStudentDetails,
+                  permanentAddressDistrict: e.target.value,
+                })
+              }
+              disabled={isLoading}
+            />
+            <Input
+              placeholder="Tỉnh/Thành phố (Địa chỉ thường trú)"
+              value={newStudentDetails.permanentAddressCity}
+              onChange={(e) =>
+                setNewStudentDetails({
+                  ...newStudentDetails,
+                  permanentAddressCity: e.target.value,
+                })
+              }
+              disabled={isLoading}
+            />
+            <Input
+              placeholder="Quốc gia (Địa chỉ thường trú)"
+              value={newStudentDetails.permanentAddressCountry}
+              onChange={(e) =>
+                setNewStudentDetails({
+                  ...newStudentDetails,
+                  permanentAddressCountry: e.target.value,
+                })
+              }
+              disabled={isLoading}
+            />
+            <Input
+              placeholder="Địa chỉ tạm trú"
+              value={newStudentDetails.temporaryAddress}
+              onChange={(e) =>
+                setNewStudentDetails({
+                  ...newStudentDetails,
+                  temporaryAddress: e.target.value,
+                })
+              }
+              disabled={isLoading}
+            />
+            <Input
+              placeholder="Địa chỉ nhận thư"
+              value={newStudentDetails.mailingAddress}
+              onChange={(e) =>
+                setNewStudentDetails({
+                  ...newStudentDetails,
+                  mailingAddress: e.target.value,
+                })
+              }
+              disabled={isLoading}
+            />
+            <Input
+              placeholder="Quốc tịch"
+              value={newStudentDetails.nationality}
+              onChange={(e) =>
+                setNewStudentDetails({
+                  ...newStudentDetails,
+                  nationality: e.target.value,
+                })
+              }
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* Cột 3: Thông tin IdentityDocuments */}
+          <div className="space-y-4">
+            <select
+              value={newIdentityDocuments.identityType}
+              onChange={(e) =>
+                setNewIdentityDocuments({
+                  ...newIdentityDocuments,
+                  identityType: e.target.value,
+                })
+              }
+              className="w-full p-2 border rounded"
+              disabled={isLoading}
+            >
+              <option value="">Chọn loại giấy tờ</option>
+              <option value="CMND">CMND</option>
+              <option value="CCCD">CCCD</option>
+              <option value="Hộ chiếu">Hộ chiếu</option>
+            </select>
+            <Input
+              placeholder={
+                newIdentityDocuments.identityType === "CMND"
+                  ? "Số CMND"
+                  : newIdentityDocuments.identityType === "CCCD"
+                  ? "Số CCCD"
+                  : "Số hộ chiếu"
+              }
+              value={newIdentityDocuments.identityNumber}
+              onChange={(e) =>
+                setNewIdentityDocuments({
+                  ...newIdentityDocuments,
+                  identityNumber: e.target.value,
+                })
+              }
+              disabled={isLoading}
+            />
+            <div className="flex items-center space-x-2">
+              <label>Ngày cấp:</label>
+              <Input
+                type="date"
+                className="w-auto"
+                value={newIdentityDocuments.issueDate}
+                onChange={(e) =>
+                  setNewIdentityDocuments({
+                    ...newIdentityDocuments,
+                    issueDate: e.target.value,
+                  })
+                }
+                disabled={isLoading}
+              />
+            </div>
+            <Input
+              placeholder="Nơi cấp"
+              value={newIdentityDocuments.issuePlace}
+              onChange={(e) =>
+                setNewIdentityDocuments({
+                  ...newIdentityDocuments,
+                  issuePlace: e.target.value,
+                })
+              }
+              disabled={isLoading}
+            />
+            <div className="flex items-center space-x-2">
+              <label>Ngày hết hạn:</label>
+              <Input
+                type="date"
+                className="w-auto"
+                value={newIdentityDocuments.expiryDate}
+                onChange={(e) =>
+                  setNewIdentityDocuments({
+                    ...newIdentityDocuments,
+                    expiryDate: e.target.value,
+                  })
+                }
+                disabled={isLoading}
+              />
+            </div>
+            {newIdentityDocuments.identityType === "CCCD" && (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  checked={newIdentityDocuments.chipAttached}
+                  onCheckedChange={(checked) =>
+                    setNewIdentityDocuments({
+                      ...newIdentityDocuments,
+                      chipAttached: checked === true,
+                    })
+                  }
+                  disabled={isLoading}
+                />
+                <label>Gắn chip</label>
+              </div>
+            )}
+            {newIdentityDocuments.identityType === "Hộ chiếu" && (
+              <>
+                <Input
+                  placeholder="Quốc gia cấp"
+                  value={newIdentityDocuments.issuingCountry}
+                  onChange={(e) =>
+                    setNewIdentityDocuments({
+                      ...newIdentityDocuments,
+                      issuingCountry: e.target.value,
+                    })
+                  }
+                  disabled={isLoading}
+                />
+                <Input
+                  placeholder="Ghi chú"
+                  value={newIdentityDocuments.note}
+                  onChange={(e) =>
+                    setNewIdentityDocuments({
+                      ...newIdentityDocuments,
+                      note: e.target.value,
+                    })
+                  }
+                  disabled={isLoading}
+                />
+              </>
+            )}
+          </div>
+
+          {/* Nút Thêm */}
+          <div className="col-span-3 mt-4">
+            <Button onClick={handleAddStudent} disabled={isLoading} className="w-full">
+              {isLoading ? "Đang thêm..." : "Thêm"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

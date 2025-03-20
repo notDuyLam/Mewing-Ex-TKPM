@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import StudentTable from "@/components/StudentTable";
 import FilterSection from "@/components/FilterSection";
 import AddStudentButton from "@/components/AddStudentButton";
-import { Toaster } from "@/components/ui/sonner";
 import ManageOptionsButton from "@/components/ManageOptionsButton";
 
 interface Department {
@@ -124,7 +123,6 @@ export default function Home() {
 
   return (
     <div className="container mx-auto p-4">
-      <Toaster />
       <h1 className="text-2xl font-bold mb-4">Danh sách Sinh viên</h1>
       <div className="flex justify-between mb-4">
         <FilterSection onSearch={handleSearch} />
