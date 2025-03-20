@@ -4,6 +4,8 @@
 import { useState, useEffect } from "react";
 import StudentTable from "@/components/StudentTable";
 import FilterSection from "@/components/FilterSection";
+import AddStudentButton from "@/components/AddStudentButton";
+import { Toaster } from "@/components/ui/sonner";
 
 interface Department {
   id: number;
@@ -79,7 +81,7 @@ export default function Home() {
       });
 
       if (res.status === 404) {
-        setStudents([]); // Không tìm thấy thì trả về trống
+        setStudents([]);
         setPagination({ ...pagination, totalPages: 1, currentPage: page });
         return;
       }
@@ -99,22 +101,30 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchStudents(pagination.currentPage, filters); // Lấy dữ liệu lần đầu
+    fetchStudents(pagination.currentPage, filters);
   }, []);
 
   const handleSearch = (newFilters: { fullName: string; studentId: string; departmentId: string }) => {
-    setFilters(newFilters); // Lưu filters mới
-    fetchStudents(1, newFilters); // Tìm kiếm từ trang 1
+    setFilters(newFilters);
+    fetchStudents(1, newFilters);
   };
 
   const handlePageChange = (page: number) => {
-    fetchStudents(page, filters); // Gọi API với trang mới, giữ filters hiện tại
+    fetchStudents(page, filters);
+  };
+
+  const handleStudentAdded = () => {
+    fetchStudents(pagination.currentPage, filters); // Làm mới danh sách sau khi thêm
   };
 
   return (
     <div className="container mx-auto p-4">
+      <Toaster />
       <h1 className="text-2xl font-bold mb-4">Danh sách Sinh viên</h1>
-      <FilterSection onSearch={handleSearch} />
+      <div className="flex justify-between mb-4">
+        <FilterSection onSearch={handleSearch} />
+        <AddStudentButton onStudentAdded={handleStudentAdded} />
+      </div>
       <StudentTable
         students={students}
         totalPages={pagination.totalPages}
