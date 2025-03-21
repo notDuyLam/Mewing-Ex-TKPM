@@ -97,7 +97,8 @@ const updateStudent = async (req, res) => {
 
 const deleteStudent = async (req, res) => {
     try {
-      const student = await Student.findByPk(req.params.studentId);
+      const studentId = req.params.studentId;
+      const student = await Student.findByPk(studentId);
       if (!student) {
         logger.warn('Student not found for deletion', { studentId });
         return res.status(404).json({ error: 'Student not found' });

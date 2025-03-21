@@ -1,4 +1,3 @@
-// app/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,6 +7,18 @@ import AddStudentButton from "@/components/AddStudentButton";
 import ManageOptionsButton from "@/components/ManageOptionsButton";
 import ExportButton from "@/components/ExportButton";
 import ImportButton from "@/components/ImportButton";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose, // Thêm DialogClose
+} from "@/components/ui/dialog";
 
 interface Department {
   id: number;
@@ -63,6 +74,7 @@ export default function Home() {
     studentId: "",
     departmentId: "",
   });
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
   const fetchStudents = async (
     page: number = 1,
@@ -113,14 +125,48 @@ export default function Home() {
 
   const handlePageChange = (page: number) => {
     fetchStudents(page, filters);
+    setSelectedStudents([]);
   };
 
   const handleStudentAdded = () => {
-    fetchStudents(pagination.currentPage, filters); // Làm mới danh sách sau khi thêm
+    fetchStudents(pagination.currentPage, filters);
   };
 
   const handleOptionsUpdated = () => {
-    fetchStudents(pagination.currentPage, filters); // Làm mới danh sách sinh viên khi tùy chọn thay đổi
+    fetchStudents(pagination.currentPage, filters);
+  };
+
+  const handleDelete = async () => {
+    try {
+      // Gửi request DELETE cho từng studentId
+      const deletePromises = selectedStudents.map((studentId) =>
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/${studentId}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }).then((res) => {
+          if (!res.ok) {
+            throw new Error(`Failed to delete student ${studentId}`);
+          }
+          return studentId; // Trả về studentId để lọc sau
+        })
+      );
+  
+      // Chờ tất cả request hoàn tất
+      const deletedIds = await Promise.all(deletePromises);
+  
+      // Cập nhật state sau khi xóa thành công
+      setStudents(students.filter((student) => !deletedIds.includes(student.studentId)));
+      setSelectedStudents([]);
+      if (students.length === deletedIds.length && pagination.currentPage > 1) {
+        fetchStudents(pagination.currentPage - 1, filters);
+      } else {
+        fetchStudents(pagination.currentPage, filters);
+      }
+      toast.success(`Đã xóa ${deletedIds.length} sinh viên thành công!`);
+    } catch (error) {
+      console.error("Error deleting students:", error);
+      toast.error("Xóa thất bại!");
+    }
   };
 
   return (
@@ -130,21 +176,47 @@ export default function Home() {
         <FilterSection onSearch={handleSearch} />
         
         <div className="flex gap-4 mb-4">
-        <AddStudentButton onStudentAdded={handleStudentAdded} />
-        <ManageOptionsButton onOptionsUpdated={handleOptionsUpdated} />
+          <AddStudentButton onStudentAdded={handleStudentAdded} />
+          <ManageOptionsButton onOptionsUpdated={handleOptionsUpdated} />
+          {selectedStudents.length > 0 && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="destructive">Xóa {selectedStudents.length} sinh viên</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Xác nhận xóa</DialogTitle>
+                  <DialogDescription>
+                    Bạn có chắc muốn xóa {selectedStudents.length} sinh viên đã chọn? Hành động này không thể hoàn tác.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Hủy</Button>
+                  </DialogClose>
+                  <Button variant="destructive" onClick={handleDelete}>
+                    Xóa
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </div>
+      
       <StudentTable
         students={students}
         totalPages={pagination.totalPages}
         currentPage={pagination.currentPage}
         pageSize={pagination.pageSize}
         onPageChange={handlePageChange}
+        onDelete={setSelectedStudents}
       />
+      
       <div className="flex gap-4 float-end mb-4">
         <ExportButton />
-        <ImportButton onOptionsUpdated={handleOptionsUpdated}/>
-        </div>
+        <ImportButton onOptionsUpdated={handleOptionsUpdated} />
+      </div>
     </div>
   );
 }
