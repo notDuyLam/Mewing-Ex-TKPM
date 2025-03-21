@@ -89,7 +89,7 @@ export default function StudentDetailPage({
 
   const fetchStudent = async (studentId: string) => {
     try {
-      const studentRes = await fetch(`http://localhost:3000/students/${studentId}`, {
+      const studentRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/${studentId}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -97,11 +97,11 @@ export default function StudentDetailPage({
       const studentData: Student = await studentRes.json();
 
       const [deptRes, statusRes, progRes, detailsRes, identityRes] = await Promise.all([
-        fetch(`http://localhost:3000/departments/${studentData.departmentId}`, { method: "GET" }),
-        fetch(`http://localhost:3000/statuses/${studentData.statusId}`, { method: "GET" }),
-        fetch(`http://localhost:3000/programs/${studentData.programId}`, { method: "GET" }),
-        fetch(`http://localhost:3000/student-details/${studentId}`, { method: "GET" }),
-        fetch(`http://localhost:3000/identity-documents/student/${studentId}`, { method: "GET" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/departments/${studentData.departmentId}`, { method: "GET" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/statuses/${studentData.statusId}`, { method: "GET" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/${studentData.programId}`, { method: "GET" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-details/${studentId}`, { method: "GET" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/identity-documents/student/${studentId}`, { method: "GET" }),
       ]);
 
       const department = deptRes.ok ? await deptRes.json() : { id: studentData.departmentId, name: "N/A" };
@@ -141,9 +141,9 @@ export default function StudentDetailPage({
   const fetchOptions = async () => {
     try {
       const [deptRes, statusRes, progRes] = await Promise.all([
-        fetch("http://localhost:3000/departments/", { method: "GET" }),
-        fetch("http://localhost:3000/statuses/", { method: "GET" }),
-        fetch("http://localhost:3000/programs/", { method: "GET" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/departments/`, { method: "GET" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/statuses/`, { method: "GET" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/`, { method: "GET" }),
       ]);
       setDepartments(deptRes.ok ? await deptRes.json() : []);
       setStatuses(statusRes.ok ? await statusRes.json() : []);
@@ -167,7 +167,7 @@ export default function StudentDetailPage({
     setIsSaving(true);
     try {
       // Cập nhật Student
-      const studentRes = await fetch(`http://localhost:3000/students/${editStudent.studentId}`, {
+      const studentRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/${editStudent.studentId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editStudent),
@@ -177,7 +177,7 @@ export default function StudentDetailPage({
       // Xử lý StudentDetails
       if (student?.details) {
         // Nếu đã tồn tại, cập nhật
-        const detailsRes = await fetch(`http://localhost:3000/student-details/${editStudent.studentId}`, {
+        const detailsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-details/${editStudent.studentId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...editDetails, studentId: editStudent.studentId }),
@@ -185,7 +185,7 @@ export default function StudentDetailPage({
         if (!detailsRes.ok) throw new Error("Failed to update student details");
       } else if (Object.values(editDetails!).some(val => val)) {
         // Nếu chưa tồn tại và có dữ liệu, thêm mới
-        const detailsRes = await fetch(`http://localhost:3000/student-details`, {
+        const detailsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-details`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...editDetails, studentId: editStudent.studentId }),
@@ -197,7 +197,7 @@ export default function StudentDetailPage({
       if (student?.identity) {
         // Nếu đã tồn tại, cập nhật
         if (editIdentity?.identityType) {
-          const identityRes = await fetch(`http://localhost:3000/identity-documents/student/${editStudent.studentId}`, {
+          const identityRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/identity-documents/student/${editStudent.studentId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ...editIdentity, studentId: editStudent.studentId }),
@@ -206,7 +206,7 @@ export default function StudentDetailPage({
         }
       } else if (editIdentity?.identityType) {
         // Nếu chưa tồn tại và có dữ liệu, thêm mới
-        const identityRes = await fetch(`http://localhost:3000/identity-documents`, {
+        const identityRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/identity-documents`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...editIdentity, studentId: editStudent.studentId }),
@@ -388,49 +388,49 @@ export default function StudentDetailPage({
                 <div className="space-y-4">
                   <Input
                     placeholder="Số nhà (Địa chỉ thường trú)"
-                    value={editDetails.permanentAddressHouse}
+                    value={editDetails.permanentAddressHouse || ""}
                     onChange={(e) => setEditDetails({ ...editDetails, permanentAddressHouse: e.target.value })}
                     disabled={isSaving}
                   />
                   <Input
                     placeholder="Phường/Xã (Địa chỉ thường trú)"
-                    value={editDetails.permanentAddressWard}
+                    value={editDetails.permanentAddressWard || ""}
                     onChange={(e) => setEditDetails({ ...editDetails, permanentAddressWard: e.target.value })}
                     disabled={isSaving}
                   />
                   <Input
                     placeholder="Quận/Huyện (Địa chỉ thường trú)"
-                    value={editDetails.permanentAddressDistrict}
+                    value={editDetails.permanentAddressDistrict || ""}
                     onChange={(e) => setEditDetails({ ...editDetails, permanentAddressDistrict: e.target.value })}
                     disabled={isSaving}
                   />
                   <Input
                     placeholder="Tỉnh/Thành phố (Địa chỉ thường trú)"
-                    value={editDetails.permanentAddressCity}
+                    value={editDetails.permanentAddressCity || ""}
                     onChange={(e) => setEditDetails({ ...editDetails, permanentAddressCity: e.target.value })}
                     disabled={isSaving}
                   />
                   <Input
                     placeholder="Quốc gia (Địa chỉ thường trú)"
-                    value={editDetails.permanentAddressCountry}
+                    value={editDetails.permanentAddressCountry || ""}
                     onChange={(e) => setEditDetails({ ...editDetails, permanentAddressCountry: e.target.value })}
                     disabled={isSaving}
                   />
                   <Input
                     placeholder="Địa chỉ tạm trú"
-                    value={editDetails.temporaryAddress}
+                    value={editDetails.temporaryAddress || ""}
                     onChange={(e) => setEditDetails({ ...editDetails, temporaryAddress: e.target.value })}
                     disabled={isSaving}
                   />
                   <Input
                     placeholder="Địa chỉ nhận thư"
-                    value={editDetails.mailingAddress}
+                    value={editDetails.mailingAddress || ""}
                     onChange={(e) => setEditDetails({ ...editDetails, mailingAddress: e.target.value })}
                     disabled={isSaving}
                   />
                   <Input
                     placeholder="Quốc tịch"
-                    value={editDetails.nationality}
+                    value={editDetails.nationality || ""}
                     onChange={(e) => setEditDetails({ ...editDetails, nationality: e.target.value })}
                     disabled={isSaving}
                   />

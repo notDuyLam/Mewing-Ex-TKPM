@@ -25,7 +25,7 @@ export default function FilterSection({ onSearch }: FilterSectionProps) {
 
   const fetchDepartments = async () => {
     try {
-      const res = await fetch("http://localhost:3000/departments/", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/departments/`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });

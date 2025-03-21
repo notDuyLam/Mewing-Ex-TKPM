@@ -12,7 +12,7 @@ export default function ExportButton() {
   const handleExport = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/students/export/${format}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/export/${format}`, {
         method: "GET",
       });
 

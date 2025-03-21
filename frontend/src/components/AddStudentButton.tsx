@@ -115,9 +115,9 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
     const fetchData = async () => {
       try {
         const [deptRes, statusRes, progRes] = await Promise.all([
-          fetch("http://localhost:3000/departments/", { method: "GET" }),
-          fetch("http://localhost:3000/statuses/", { method: "GET" }),
-          fetch("http://localhost:3000/programs/", { method: "GET" }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/departments/`, { method: "GET" }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/statuses/`, { method: "GET" }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/`, { method: "GET" }),
         ]);
 
         if (!deptRes.ok || !statusRes.ok || !progRes.ok) {
@@ -210,7 +210,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
     setIsLoading(true);
     try {
       // Tạo Student
-      const studentRes = await fetch("http://localhost:3000/students", {
+      const studentRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newStudent),
@@ -224,7 +224,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
 
       // Tạo StudentDetails
       const studentDetailsData = { ...newStudentDetails, studentId: newStudent.studentId };
-      const detailsRes = await fetch("http://localhost:3000/student-details", {
+      const detailsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-details`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(studentDetailsData),
@@ -242,7 +242,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
           ...newIdentityDocuments,
           studentId: newStudent.studentId,
         };
-        const identityRes = await fetch("http://localhost:3000/identity-documents", {
+        const identityRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/identity-documents`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(identityDocumentsData),

@@ -32,7 +32,7 @@ export default function ImportButton({onOptionsUpdated} : onDoneProps ) {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:3000/students/import", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/import`, {
         method: "POST",
         body: formData,
       });

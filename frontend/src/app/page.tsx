@@ -77,7 +77,7 @@ export default function Home() {
         ...(filterParams.departmentId && { departmentId: filterParams.departmentId }),
       }).toString();
 
-      const res = await fetch(`http://localhost:3000/students?${query}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students?${query}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -126,12 +126,13 @@ export default function Home() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Danh sách Sinh viên</h1>
-      <div className="flex justify-between mb-4">
+      <div className="flex justify-between mb-4 flex-col">
         <FilterSection onSearch={handleSearch} />
+        
+        <div className="flex gap-4 mb-4">
         <AddStudentButton onStudentAdded={handleStudentAdded} />
-        <ExportButton />
-        <ImportButton onOptionsUpdated={handleOptionsUpdated}/>
         <ManageOptionsButton onOptionsUpdated={handleOptionsUpdated} />
+        </div>
       </div>
       <StudentTable
         students={students}
@@ -140,6 +141,10 @@ export default function Home() {
         pageSize={pagination.pageSize}
         onPageChange={handlePageChange}
       />
+      <div className="flex gap-4 float-end mb-4">
+        <ExportButton />
+        <ImportButton onOptionsUpdated={handleOptionsUpdated}/>
+        </div>
     </div>
   );
 }

@@ -50,9 +50,9 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
   const fetchData = async () => {
     try {
       const [deptRes, statusRes, progRes] = await Promise.all([
-        fetch("http://localhost:3000/departments/", { method: "GET" }),
-        fetch("http://localhost:3000/statuses/", { method: "GET" }),
-        fetch("http://localhost:3000/programs/", { method: "GET" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/departments/`, { method: "GET" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/statuses/`, { method: "GET" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/`, { method: "GET" }),
       ]);
 
       if (!deptRes.ok || !statusRes.ok || !progRes.ok) {
@@ -90,7 +90,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
           setIsLoading(false);
           return;
         }
-        url = "http://localhost:3000/departments/";
+        url = `${process.env.NEXT_PUBLIC_API_URL}/departments/`;
         data = { name: newDepartment };
         setNewValue = setNewDepartment;
         break;
@@ -100,7 +100,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
           setIsLoading(false);
           return;
         }
-        url = "http://localhost:3000/statuses/";
+        url = `${process.env.NEXT_PUBLIC_API_URL}/statuses/`;
         data = { name: newStatus };
         setNewValue = setNewStatus;
         break;
@@ -110,7 +110,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
           setIsLoading(false);
           return;
         }
-        url = "http://localhost:3000/programs/";
+        url = `${process.env.NEXT_PUBLIC_API_URL}/programs/`;
         data = { name: newProgram };
         setNewValue = setNewProgram;
         break;
@@ -154,7 +154,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
           setIsLoading(false);
           return;
         }
-        url = `http://localhost:3000/departments/${editDepartment?.id}`;
+        url = `${process.env.NEXT_PUBLIC_API_URL}/departments/${editDepartment?.id}`;
         data = editDepartment;
         break;
       case "status":
@@ -163,7 +163,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
           setIsLoading(false);
           return;
         }
-        url = `http://localhost:3000/statuses/${editStatus?.id}`;
+        url = `${process.env.NEXT_PUBLIC_API_URL}/statuses/${editStatus?.id}`;
         data = editStatus;
         break;
       case "program":
@@ -172,7 +172,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
           setIsLoading(false);
           return;
         }
-        url = `http://localhost:3000/programs/${editProgram?.id}`;
+        url = `${process.env.NEXT_PUBLIC_API_URL}/programs/${editProgram?.id}`;
         data = editProgram;
         break;
     }
