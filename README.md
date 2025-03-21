@@ -45,3 +45,17 @@ npm run dev
 ```
 npm run dev
 ```
+
+# Danh mục hình ảnh minh chứng
+- Cho phép đổi tên & thêm mới: khoa, tình trạng sinh viên, chương trình
+
+<img src="./images/label-management.png" alt="Mô tả hình ảnh" width="auto">
+
+- Tìm kiếm theo tên khoa, khoa + tên, hỗ trợ IMPORT/EXPORT
+
+<img src="./images/main-page.png" alt="Mô tả hình ảnh" width="auto">
+
+- Logging mechanism để troubleshooting production issue & audit purposes
+
+<img src="./images/logs-1.png" alt="Mô tả hình ảnh" width="auto">
+<img src="./images/logs-2.png" alt="Mô tả hình ảnh" width="auto">
