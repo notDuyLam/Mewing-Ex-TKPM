@@ -1,50 +1,47 @@
 # Project Name
 Student Management
 
-## Cấu trúc source code
-```
-student-management/
-│── backend/
-│   └── config/
-│       └── database.js
-│   └── controllers/
-│       └── studentController.js
-│   └── models/
-│       └── student.js
-│   └── routes/
-│       └── studentRoutes.js
-│   └── app.js
-│── frontend/
-│   └── index.html
-│   └── script.js
-│   └── style.css                           
-│── package.json
-│── package-lock.json
-│── .gitignore       
-│── README.md
-```
-
 ## Hướng dẫn cài đặt và chạy chương trình
-### Cài đặt
-1. Cài đặt postgreSQL nếu chưa có hoặc sử dụng database đã có.
-2. Nếu dùng pgAdmin cho việc cài postgreSQL local. Tạo 1 database với username và mật khẩu
-3. Tạo file .env với cấu trúc:
+## Cài đặt
+### Backend
 ```
-DB_URL="localhost"
-DB_USER="username"
-DB_PASSWORD="password"
+cd backend/
 ```
-4. Điền các thông tin vào .env, DB_URL nếu dùng local thì giữ nguyên.
-5. Cài đặt các thư viện cần thiết bằng lệnh
-```sh
+```
 npm install
 ```
-### Chạy chương trình
-1. **Backend**: Khởi chạy server lắng nghe port 3000
-```sh
+- Tạo file <b>.env</b> với cấu trúc như <b>.env.example</b>
+```
+PORT=
+NODE_ENV=
+
+DB_NAME=
+DB_USER=
+DB_PASSWORD=
+DB_HOST=
+DB_PORT=
+DB_DIALECT=
+NODE_ENV=
+```
+- Yêu cầu có Database sử dụng <b>sequelize</b> để thiết lập, ở đây nhóm dùng <b>PostgreSQL</b>
+### Frontend
+```
+cd frontend/
+```
+```
+npm install
+```
+- Tạo file <b>.env.local</b> với cấu trúc như <b>.env.example</b>
+```
+NEXT_PUBLIC_API_URL=
+```
+- Mặc định frontend chạy PORT 3001, để tùy chỉnh vào file <b>package.json</b>
+## Chạy chương trình
+### Backend
+```
 npm run dev
 ```
-2. **Frontend**: Mở file `index.html` bằng 1 công cụ trình duyệt (Chrome).
-
-
- 
+### Frontend
+```
+npm run dev
+```
