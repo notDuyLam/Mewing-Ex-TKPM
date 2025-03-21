@@ -348,10 +348,46 @@ const importFromFile = async (req, res) => {
         email: student.email || student['Email'] || null,
         course: student.course || student['Course'] || null,
         phoneNumber: student.phoneNumber || student['Phone Number'] || null,
-        departmentId: departmentMap.get(student.department || student['Department']) || null,
-        statusId: statusMap.get(student.status || student['Status']) || null,
-        programId: programMap.get(student.program || student['Program']) || null,
+        departmentId: null, // Sẽ được gán sau khi xử lý
+        statusId: null,     // Sẽ được gán sau khi xử lý
+        programId: null,    // Sẽ được gán sau khi xử lý
       };
+
+      // Xử lý Department
+      const departmentName = student.department || student['Department'];
+      if (departmentName) {
+        let departmentId = departmentMap.get(departmentName);
+        if (!departmentId) {
+          const newDepartment = await Department.create({ name: departmentName });
+          departmentId = newDepartment.id;
+          departmentMap.set(departmentName, departmentId); // Cập nhật Map
+        }
+        studentData.departmentId = departmentId;
+      }
+
+      // Xử lý Status
+      const statusName = student.status || student['Status'];
+      if (statusName) {
+        let statusId = statusMap.get(statusName);
+        if (!statusId) {
+          const newStatus = await Status.create({ name: statusName });
+          statusId = newStatus.id;
+          statusMap.set(statusName, statusId); // Cập nhật Map
+        }
+        studentData.statusId = statusId;
+      }
+
+      // Xử lý Program
+      const programName = student.program || student['Program'];
+      if (programName) {
+        let programId = programMap.get(programName);
+        if (!programId) {
+          const newProgram = await Program.create({ name: programName });
+          programId = newProgram.id;
+          programMap.set(programName, programId); // Cập nhật Map
+        }
+        studentData.programId = programId;
+      }
 
       const detailsData = {
         studentId: studentData.studentId,
