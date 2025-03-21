@@ -4,41 +4,44 @@ Student Management
 ## Hướng dẫn cài đặt và chạy chương trình
 ## Cài đặt
 ### Backend
-```
-cd backend/
-```
-```
-npm install
-```
-- Tạo file <b>.env</b> với cấu trúc như <b>.env.example</b>
-```
-PORT=
-NODE_ENV=
+1. ```
+    cd backend/
+   ```
+2. ```
+    npm install
+   ```
+3. Tạo file <b>.env</b> với cấu trúc như <b>.env.example</b>
+   ```
+    PORT=
+    NODE_ENV=
 
-DB_NAME=
-DB_USER=
-DB_PASSWORD=
-DB_HOST=
-DB_PORT=
-DB_DIALECT=
-NODE_ENV=
-```
-- Yêu cầu có Database sử dụng <b>sequelize</b> để thiết lập, ở đây nhóm dùng <b>PostgreSQL</b>
-- Sau đó tiến hành chạy migrate để tạo bảng
-```
-npx sequelize-cli db:migrate
-```
+    DB_NAME=
+    DB_USER=
+    DB_PASSWORD=
+    DB_HOST=
+    DB_PORT=
+    DB_DIALECT=
+    NODE_ENV=
+   ```
+4. Yêu cầu có Database sử dụng <b>sequelize</b> để thiết lập, ở đây nhóm dùng <b>PostgreSQL</b>. Sau đó tiến hành chạy migrate để tạo bảng
+    ```
+    npx sequelize-cli db:migrate
+    ```
+5. Tiếp đến, tiến hành điền dữ liệu seeders
+    ```
+    npx sequelize-cli db:seed:all
+    ```
 ### Frontend
-```
-cd frontend/
-```
-```
-npm install
-```
-- Tạo file <b>.env.local</b> với cấu trúc như <b>.env.example</b>
-```
-NEXT_PUBLIC_API_URL=
-```
+1.  ```
+    cd frontend/
+    ```
+2.  ```
+    npm install
+    ```
+3. Tạo file <b>.env.local</b> với cấu trúc như <b>.env.example</b>
+    ```
+    NEXT_PUBLIC_API_URL=
+    ```
 - Mặc định frontend chạy <b>PORT 3001</b>, để tùy chỉnh vào file <b>package.json</b>
 ## Chạy chương trình
 ### Backend

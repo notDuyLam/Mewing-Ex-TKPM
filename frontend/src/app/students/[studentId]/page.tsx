@@ -1,4 +1,3 @@
-// app/students/[studentId]/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,6 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,12 +113,10 @@ export default function StudentDetailPage({
       const identity = identityRes.ok ? await identityRes.json() : null;
 
       studentData.dateOfBirth = studentData.dateOfBirth.split("T")[0];
-      if(identity) {
+      if (identity) {
         identity.issueDate = identity.issueDate.split("T")[0];
         identity.expiryDate = identity.expiryDate.split("T")[0];
       }
-
-      console.log(identity);
 
       const fullStudent = { ...studentData, department, status, program, details, identity };
       setStudent(fullStudent);
@@ -166,7 +166,6 @@ export default function StudentDetailPage({
     if (!editStudent) return;
     setIsSaving(true);
     try {
-      // Cập nhật Student
       const studentRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/${editStudent.studentId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -174,9 +173,7 @@ export default function StudentDetailPage({
       });
       if (!studentRes.ok) throw new Error("Failed to update student");
 
-      // Xử lý StudentDetails
       if (student?.details) {
-        // Nếu đã tồn tại, cập nhật
         const detailsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-details/${editStudent.studentId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -184,7 +181,6 @@ export default function StudentDetailPage({
         });
         if (!detailsRes.ok) throw new Error("Failed to update student details");
       } else if (Object.values(editDetails!).some(val => val)) {
-        // Nếu chưa tồn tại và có dữ liệu, thêm mới
         const detailsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-details`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -193,9 +189,7 @@ export default function StudentDetailPage({
         if (!detailsRes.ok) throw new Error("Failed to create student details");
       }
 
-      // Xử lý IdentityDocuments
       if (student?.identity) {
-        // Nếu đã tồn tại, cập nhật
         if (editIdentity?.identityType) {
           const identityRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/identity-documents/student/${editStudent.studentId}`, {
             method: "PUT",
@@ -205,7 +199,6 @@ export default function StudentDetailPage({
           if (!identityRes.ok) throw new Error("Failed to update identity documents");
         }
       } else if (editIdentity?.identityType) {
-        // Nếu chưa tồn tại và có dữ liệu, thêm mới
         const identityRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/identity-documents`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -216,13 +209,36 @@ export default function StudentDetailPage({
 
       toast.success("Cập nhật thành công!");
       setIsEditOpen(false);
-      fetchStudent(editStudent.studentId); // Refresh data
+      fetchStudent(editStudent.studentId);
     } catch (error) {
       console.error("Error updating student:", error);
       toast.error("Cập nhật thất bại!");
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleDelete = async () => {
+    if (!student) return;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/${student.studentId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!res.ok) throw new Error("Failed to delete student");
+
+      toast.success("Xóa sinh viên thành công!");
+      router.push("/"); // Quay về danh sách sau khi xóa
+    } catch (error) {
+      console.error("Error deleting student:", error);
+      toast.error("Xóa thất bại!");
+    }
+  };
+
+  const handleEditOpen = async () => {
+    setIsEditOpen(true);
+    await fetchOptions(); // Fetch lại departments, programs, statuses khi mở dialog
   };
 
   if (loading) return <div className="container mx-auto p-4">Đang tải...</div>;
@@ -287,241 +303,261 @@ export default function StudentDetailPage({
       </div>
       <div className="mt-6 flex justify-between">
         <Button variant="outline" onClick={() => router.push("/")}>Trở về</Button>
-        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-          <DialogTrigger asChild>
-            <Button>Chỉnh sửa</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-6xl">
-            <DialogHeader>
-              <DialogTitle>Chỉnh sửa Sinh viên</DialogTitle>
-            </DialogHeader>
-            {editStudent && editDetails && editIdentity && (
-              <div className="grid grid-cols-3 gap-4">
-                {/* Cột 1: Thông tin Student */}
-                <div className="space-y-4">
-                  <Input
-                    placeholder="Mã sinh viên"
-                    value={editStudent.studentId}
-                    onChange={(e) => setEditStudent({ ...editStudent, studentId: e.target.value })}
-                    disabled={isSaving}
-                  />
-                  <Input
-                    placeholder="Họ tên"
-                    value={editStudent.fullName}
-                    onChange={(e) => setEditStudent({ ...editStudent, fullName: e.target.value })}
-                    disabled={isSaving}
-                  />
-                  <div className="flex items-center space-x-2">
-                    <label>Ngày sinh:</label>
+        <div className="flex gap-2">
+          <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={handleEditOpen}>Chỉnh sửa</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-6xl">
+              <DialogHeader>
+                <DialogTitle>Chỉnh sửa Sinh viên</DialogTitle>
+              </DialogHeader>
+              {editStudent && editDetails && editIdentity && (
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-4">
                     <Input
-                      className="w-auto"
-                      type="date"
-                      value={editStudent.dateOfBirth}
-                      onChange={(e) => setEditStudent({ ...editStudent, dateOfBirth: e.target.value })}
+                      placeholder="Mã sinh viên"
+                      value={editStudent.studentId}
+                      onChange={(e) => setEditStudent({ ...editStudent, studentId: e.target.value })}
                       disabled={isSaving}
                     />
-                  </div>
-                  <select
-                    value={editStudent.gender}
-                    onChange={(e) => setEditStudent({ ...editStudent, gender: e.target.value })}
-                    className="w-full p-2 border rounded"
-                    disabled={isSaving}
-                  >
-                    <option value="">Chọn giới tính</option>
-                    <option value="Nam">Nam</option>
-                    <option value="Nữ">Nữ</option>
-                  </select>
-                  <Input
-                    placeholder="Email"
-                    value={editStudent.email}
-                    onChange={(e) => setEditStudent({ ...editStudent, email: e.target.value })}
-                    disabled={isSaving}
-                  />
-                  <Input
-                    placeholder="Số điện thoại"
-                    value={editStudent.phoneNumber}
-                    onChange={(e) => setEditStudent({ ...editStudent, phoneNumber: e.target.value })}
-                    disabled={isSaving}
-                  />
-                  <select
-                    value={editStudent.departmentId}
-                    onChange={(e) => setEditStudent({ ...editStudent, departmentId: Number(e.target.value) })}
-                    className="w-full p-2 border rounded"
-                    disabled={isSaving || departments.length === 0}
-                  >
-                    <option value={0}>Chọn khoa</option>
-                    {departments.map((dept) => (
-                      <option key={dept.id} value={dept.id}>{dept.name}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={editStudent.statusId}
-                    onChange={(e) => setEditStudent({ ...editStudent, statusId: Number(e.target.value) })}
-                    className="w-full p-2 border rounded"
-                    disabled={isSaving || statuses.length === 0}
-                  >
-                    <option value={0}>Chọn trạng thái</option>
-                    {statuses.map((status) => (
-                      <option key={status.id} value={status.id}>{status.name}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={editStudent.programId}
-                    onChange={(e) => setEditStudent({ ...editStudent, programId: Number(e.target.value) })}
-                    className="w-full p-2 border rounded"
-                    disabled={isSaving || programs.length === 0}
-                  >
-                    <option value={0}>Chọn chương trình</option>
-                    {programs.map((prog) => (
-                      <option key={prog.id} value={prog.id}>{prog.name}</option>
-                    ))}
-                  </select>
-                  <Input
-                    placeholder="Khóa (ví dụ: K45)"
-                    value={editStudent.course}
-                    onChange={(e) => setEditStudent({ ...editStudent, course: e.target.value })}
-                    disabled={isSaving}
-                  />
-                </div>
-
-                {/* Cột 2: Thông tin StudentDetails */}
-                <div className="space-y-4">
-                  <Input
-                    placeholder="Số nhà (Địa chỉ thường trú)"
-                    value={editDetails.permanentAddressHouse || ""}
-                    onChange={(e) => setEditDetails({ ...editDetails, permanentAddressHouse: e.target.value })}
-                    disabled={isSaving}
-                  />
-                  <Input
-                    placeholder="Phường/Xã (Địa chỉ thường trú)"
-                    value={editDetails.permanentAddressWard || ""}
-                    onChange={(e) => setEditDetails({ ...editDetails, permanentAddressWard: e.target.value })}
-                    disabled={isSaving}
-                  />
-                  <Input
-                    placeholder="Quận/Huyện (Địa chỉ thường trú)"
-                    value={editDetails.permanentAddressDistrict || ""}
-                    onChange={(e) => setEditDetails({ ...editDetails, permanentAddressDistrict: e.target.value })}
-                    disabled={isSaving}
-                  />
-                  <Input
-                    placeholder="Tỉnh/Thành phố (Địa chỉ thường trú)"
-                    value={editDetails.permanentAddressCity || ""}
-                    onChange={(e) => setEditDetails({ ...editDetails, permanentAddressCity: e.target.value })}
-                    disabled={isSaving}
-                  />
-                  <Input
-                    placeholder="Quốc gia (Địa chỉ thường trú)"
-                    value={editDetails.permanentAddressCountry || ""}
-                    onChange={(e) => setEditDetails({ ...editDetails, permanentAddressCountry: e.target.value })}
-                    disabled={isSaving}
-                  />
-                  <Input
-                    placeholder="Địa chỉ tạm trú"
-                    value={editDetails.temporaryAddress || ""}
-                    onChange={(e) => setEditDetails({ ...editDetails, temporaryAddress: e.target.value })}
-                    disabled={isSaving}
-                  />
-                  <Input
-                    placeholder="Địa chỉ nhận thư"
-                    value={editDetails.mailingAddress || ""}
-                    onChange={(e) => setEditDetails({ ...editDetails, mailingAddress: e.target.value })}
-                    disabled={isSaving}
-                  />
-                  <Input
-                    placeholder="Quốc tịch"
-                    value={editDetails.nationality || ""}
-                    onChange={(e) => setEditDetails({ ...editDetails, nationality: e.target.value })}
-                    disabled={isSaving}
-                  />
-                </div>
-
-                {/* Cột 3: Thông tin IdentityDocuments */}
-                <div className="space-y-4">
-                  <select
-                    value={editIdentity.identityType}
-                    onChange={(e) => setEditIdentity({ ...editIdentity, identityType: e.target.value })}
-                    className="w-full p-2 border rounded"
-                    disabled={isSaving}
-                  >
-                    <option value="">Chọn loại giấy tờ</option>
-                    <option value="CMND">CMND</option>
-                    <option value="CCCD">CCCD</option>
-                    <option value="Hộ chiếu">Hộ chiếu</option>
-                  </select>
-                  <Input
-                    placeholder={
-                      editIdentity.identityType === "CMND" ? "Số CMND" :
-                      editIdentity.identityType === "CCCD" ? "Số CCCD" : "Số hộ chiếu"
-                    }
-                    value={editIdentity.identityNumber}
-                    onChange={(e) => setEditIdentity({ ...editIdentity, identityNumber: e.target.value })}
-                    disabled={isSaving}
-                  />
-                  <div className="flex items-center space-x-2">
-                    <label>Ngày cấp:</label>
                     <Input
-                      type="date"
-                      className="w-auto"
-                      value={editIdentity.issueDate}
-                      onChange={(e) => setEditIdentity({ ...editIdentity, issueDate: e.target.value })}
+                      placeholder="Họ tên"
+                      value={editStudent.fullName}
+                      onChange={(e) => setEditStudent({ ...editStudent, fullName: e.target.value })}
                       disabled={isSaving}
                     />
-                  </div>
-                  <Input
-                    placeholder="Nơi cấp"
-                    value={editIdentity.issuePlace}
-                    onChange={(e) => setEditIdentity({ ...editIdentity, issuePlace: e.target.value })}
-                    disabled={isSaving}
-                  />
-                  <div className="flex items-center space-x-2">
-                    <label>Ngày hết hạn:</label>
-                    <Input
-                      type="date"
-                      className="w-auto"
-                      value={editIdentity.expiryDate}
-                      onChange={(e) => setEditIdentity({ ...editIdentity, expiryDate: e.target.value })}
-                      disabled={isSaving}
-                    />
-                  </div>
-                  {editIdentity.identityType === "CCCD" && (
                     <div className="flex items-center space-x-2">
-                      <Checkbox
-                        checked={editIdentity.chipAttached}
-                        onCheckedChange={(checked) => setEditIdentity({ ...editIdentity, chipAttached: checked === true })}
+                      <label>Ngày sinh:</label>
+                      <Input
+                        className="w-auto"
+                        type="date"
+                        value={editStudent.dateOfBirth}
+                        onChange={(e) => setEditStudent({ ...editStudent, dateOfBirth: e.target.value })}
                         disabled={isSaving}
                       />
-                      <label>Gắn chip</label>
                     </div>
-                  )}
-                  {editIdentity.identityType === "Hộ chiếu" && (
-                    <>
-                      <Input
-                        placeholder="Quốc gia cấp"
-                        value={editIdentity.issuingCountry}
-                        onChange={(e) => setEditIdentity({ ...editIdentity, issuingCountry: e.target.value })}
-                        disabled={isSaving}
-                      />
-                      <Input
-                        placeholder="Ghi chú"
-                        value={editIdentity.note}
-                        onChange={(e) => setEditIdentity({ ...editIdentity, note: e.target.value })}
-                        disabled={isSaving}
-                      />
-                    </>
-                  )}
-                </div>
+                    <select
+                      value={editStudent.gender}
+                      onChange={(e) => setEditStudent({ ...editStudent, gender: e.target.value })}
+                      className="w-full p-2 border rounded"
+                      disabled={isSaving}
+                    >
+                      <option value="">Chọn giới tính</option>
+                      <option value="Nam">Nam</option>
+                      <option value="Nữ">Nữ</option>
+                    </select>
+                    <Input
+                      placeholder="Email"
+                      value={editStudent.email}
+                      onChange={(e) => setEditStudent({ ...editStudent, email: e.target.value })}
+                      disabled={isSaving}
+                    />
+                    <Input
+                      placeholder="Số điện thoại"
+                      value={editStudent.phoneNumber}
+                      onChange={(e) => setEditStudent({ ...editStudent, phoneNumber: e.target.value })}
+                      disabled={isSaving}
+                    />
+                    <select
+                      value={editStudent.departmentId}
+                      onChange={(e) => setEditStudent({ ...editStudent, departmentId: Number(e.target.value) })}
+                      className="w-full p-2 border rounded"
+                      disabled={isSaving || departments.length === 0}
+                    >
+                      <option value={0}>Chọn khoa</option>
+                      {departments.map((dept) => (
+                        <option key={dept.id} value={dept.id}>{dept.name}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={editStudent.statusId}
+                      onChange={(e) => setEditStudent({ ...editStudent, statusId: Number(e.target.value) })}
+                      className="w-full p-2 border rounded"
+                      disabled={isSaving || statuses.length === 0}
+                    >
+                      <option value={0}>Chọn trạng thái</option>
+                      {statuses.map((status) => (
+                        <option key={status.id} value={status.id}>{status.name}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={editStudent.programId}
+                      onChange={(e) => setEditStudent({ ...editStudent, programId: Number(e.target.value) })}
+                      className="w-full p-2 border rounded"
+                      disabled={isSaving || programs.length === 0}
+                    >
+                      <option value={0}>Chọn chương trình</option>
+                      {programs.map((prog) => (
+                        <option key={prog.id} value={prog.id}>{prog.name}</option>
+                      ))}
+                    </select>
+                    <Input
+                      placeholder="Khóa (ví dụ: K45)"
+                      value={editStudent.course}
+                      onChange={(e) => setEditStudent({ ...editStudent, course: e.target.value })}
+                      disabled={isSaving}
+                    />
+                  </div>
 
-                {/* Nút Lưu */}
-                <div className="col-span-3 mt-4">
-                  <Button onClick={handleSave} disabled={isSaving} className="w-full">
-                    {isSaving ? "Đang lưu..." : "Lưu"}
-                  </Button>
+                  <div className="space-y-4">
+                    <Input
+                      placeholder="Số nhà (Địa chỉ thường trú)"
+                      value={editDetails.permanentAddressHouse || ""}
+                      onChange={(e) => setEditDetails({ ...editDetails, permanentAddressHouse: e.target.value })}
+                      disabled={isSaving}
+                    />
+                    <Input
+                      placeholder="Phường/Xã (Địa chỉ thường trú)"
+                      value={editDetails.permanentAddressWard || ""}
+                      onChange={(e) => setEditDetails({ ...editDetails, permanentAddressWard: e.target.value })}
+                      disabled={isSaving}
+                    />
+                    <Input
+                      placeholder="Quận/Huyện (Địa chỉ thường trú)"
+                      value={editDetails.permanentAddressDistrict || ""}
+                      onChange={(e) => setEditDetails({ ...editDetails, permanentAddressDistrict: e.target.value })}
+                      disabled={isSaving}
+                    />
+                    <Input
+                      placeholder="Tỉnh/Thành phố (Địa chỉ thường trú)"
+                      value={editDetails.permanentAddressCity || ""}
+                      onChange={(e) => setEditDetails({ ...editDetails, permanentAddressCity: e.target.value })}
+                      disabled={isSaving}
+                    />
+                    <Input
+                      placeholder="Quốc gia (Địa chỉ thường trú)"
+                      value={editDetails.permanentAddressCountry || ""}
+                      onChange={(e) => setEditDetails({ ...editDetails, permanentAddressCountry: e.target.value })}
+                      disabled={isSaving}
+                    />
+                    <Input
+                      placeholder="Địa chỉ tạm trú"
+                      value={editDetails.temporaryAddress || ""}
+                      onChange={(e) => setEditDetails({ ...editDetails, temporaryAddress: e.target.value })}
+                      disabled={isSaving}
+                    />
+                    <Input
+                      placeholder="Địa chỉ nhận thư"
+                      value={editDetails.mailingAddress || ""}
+                      onChange={(e) => setEditDetails({ ...editDetails, mailingAddress: e.target.value })}
+                      disabled={isSaving}
+                    />
+                    <Input
+                      placeholder="Quốc tịch"
+                      value={editDetails.nationality || ""}
+                      onChange={(e) => setEditDetails({ ...editDetails, nationality: e.target.value })}
+                      disabled={isSaving}
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <select
+                      value={editIdentity.identityType}
+                      onChange={(e) => setEditIdentity({ ...editIdentity, identityType: e.target.value })}
+                      className="w-full p-2 border rounded"
+                      disabled={isSaving}
+                    >
+                      <option value="">Chọn loại giấy tờ</option>
+                      <option value="CMND">CMND</option>
+                      <option value="CCCD">CCCD</option>
+                      <option value="Hộ chiếu">Hộ chiếu</option>
+                    </select>
+                    <Input
+                      placeholder={
+                        editIdentity.identityType === "CMND" ? "Số CMND" :
+                        editIdentity.identityType === "CCCD" ? "Số CCCD" : "Số hộ chiếu"
+                      }
+                      value={editIdentity.identityNumber}
+                      onChange={(e) => setEditIdentity({ ...editIdentity, identityNumber: e.target.value })}
+                      disabled={isSaving}
+                    />
+                    <div className="flex items-center space-x-2">
+                      <label>Ngày cấp:</label>
+                      <Input
+                        type="date"
+                        className="w-auto"
+                        value={editIdentity.issueDate}
+                        onChange={(e) => setEditIdentity({ ...editIdentity, issueDate: e.target.value })}
+                        disabled={isSaving}
+                      />
+                    </div>
+                    <Input
+                      placeholder="Nơi cấp"
+                      value={editIdentity.issuePlace}
+                      onChange={(e) => setEditIdentity({ ...editIdentity, issuePlace: e.target.value })}
+                      disabled={isSaving}
+                    />
+                    <div className="flex items-center space-x-2">
+                      <label>Ngày hết hạn:</label>
+                      <Input
+                        type="date"
+                        className="w-auto"
+                        value={editIdentity.expiryDate}
+                        onChange={(e) => setEditIdentity({ ...editIdentity, expiryDate: e.target.value })}
+                        disabled={isSaving}
+                      />
+                    </div>
+                    {editIdentity.identityType === "CCCD" && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={editIdentity.chipAttached}
+                          onCheckedChange={(checked) => setEditIdentity({ ...editIdentity, chipAttached: checked === true })}
+                          disabled={isSaving}
+                        />
+                        <label>Gắn chip</label>
+                      </div>
+                    )}
+                    {editIdentity.identityType === "Hộ chiếu" && (
+                      <>
+                        <Input
+                          placeholder="Quốc gia cấp"
+                          value={editIdentity.issuingCountry}
+                          onChange={(e) => setEditIdentity({ ...editIdentity, issuingCountry: e.target.value })}
+                          disabled={isSaving}
+                        />
+                        <Input
+                          placeholder="Ghi chú"
+                          value={editIdentity.note}
+                          onChange={(e) => setEditIdentity({ ...editIdentity, note: e.target.value })}
+                          disabled={isSaving}
+                        />
+                      </>
+                    )}
+                  </div>
+
+                  <div className="col-span-3 mt-4">
+                    <Button onClick={handleSave} disabled={isSaving} className="w-full">
+                      {isSaving ? "Đang lưu..." : "Lưu"}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+              )}
+            </DialogContent>
+          </Dialog>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="destructive">Xóa sinh viên</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Xác nhận xóa</DialogTitle>
+                <DialogDescription>
+                  Bạn có chắc muốn xóa sinh viên {student.fullName} ({student.studentId})? Hành động này không thể hoàn tác.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Hủy</Button>
+                </DialogClose>
+                <Button variant="destructive" onClick={handleDelete}>
+                  Xóa
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
     </div>
   );
