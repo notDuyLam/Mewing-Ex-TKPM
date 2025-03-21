@@ -416,14 +416,24 @@ const importFromFile = async (req, res) => {
       // Thêm hoặc cập nhật sinh viên
       await Student.upsert(studentData);
 
-      // Thêm hoặc cập nhật StudentDetails nếu có dữ liệu
+      // Kiểm tra và xử lý StudentDetails
       if (Object.values(detailsData).some(val => val !== null && val !== '')) {
-        await StudentDetails.upsert(detailsData);
+        const existingDetails = await StudentDetails.findOne({ where: { studentId: detailsData.studentId } });
+        if (existingDetails) {
+          await existingDetails.update(detailsData);
+        } else {
+          await StudentDetails.create(detailsData);
+        }
       }
 
-      // Thêm hoặc cập nhật IdentityDocuments nếu có identityType
+      // Kiểm tra và xử lý IdentityDocuments
       if (identityData.identityType) {
-        await IdentityDocuments.upsert(identityData);
+        const existingIdentity = await IdentityDocuments.findOne({ where: { studentId: identityData.studentId } });
+        if (existingIdentity) {
+          await existingIdentity.update(identityData);
+        } else {
+          await IdentityDocuments.create(identityData);
+        }
       }
     }
 
