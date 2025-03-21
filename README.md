@@ -21,8 +21,17 @@ DB_PASSWORD=
 DB_HOST=
 DB_PORT=
 DB_DIALECT=
-NODE_ENV=
 ```
+
+- **PORT**: Cổng chạy ứng dụng Node.js  
+- **NODE_ENV**: `development`, `production`, hoặc `test`  
+- **DB_NAME**: Tên database  
+- **DB_USER**: Tên user database  
+- **DB_PASSWORD**: Mật khẩu database  
+- **DB_HOST**: Địa chỉ database (nếu cục bộ thì là `localhost`)  
+- **DB_PORT**: Cổng database (PostgreSQL thường là `5432`, MySQL là `3306`)  
+- **DB_DIALECT**: Loại database (`postgres`, `mysql`, `sqlite`, v.v.)  
+
 - Yêu cầu có Database sử dụng <b>sequelize</b> để thiết lập, ở đây nhóm dùng <b>PostgreSQL</b>
 - Sau đó tiến hành chạy migrate để tạo bảng
 ```
