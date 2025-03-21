@@ -24,6 +24,10 @@ DB_DIALECT=
 NODE_ENV=
 ```
 - Yêu cầu có Database sử dụng <b>sequelize</b> để thiết lập, ở đây nhóm dùng <b>PostgreSQL</b>
+- Sau đó tiến hành chạy migrate để tạo bảng
+```
+npx sequelize-cli db:migrate
+```
 ### Frontend
 ```
 cd frontend/
@@ -35,7 +39,7 @@ npm install
 ```
 NEXT_PUBLIC_API_URL=
 ```
-- Mặc định frontend chạy PORT 3001, để tùy chỉnh vào file <b>package.json</b>
+- Mặc định frontend chạy <b>PORT 3001</b>, để tùy chỉnh vào file <b>package.json</b>
 ## Chạy chương trình
 ### Backend
 ```
