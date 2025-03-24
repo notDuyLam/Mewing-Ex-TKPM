@@ -125,7 +125,7 @@ const updateStudent = async (req, res) => {
     if (!validateEmailDomain(email)) {
       return res
         .status(400)
-        .json({ message: `Email must belong to the domain @${allowedDomain}` });
+        .json({ message: `Email phải thuộc tên miền @${allowedDomain}` });
     }
 
     await student.update(updatedData);
