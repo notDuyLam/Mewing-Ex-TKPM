@@ -122,6 +122,12 @@ const updateStudent = async (req, res) => {
       statusId: req.body.statusId || student.statusId,
     };
 
+    if (!validateEmailDomain(email)) {
+      return res
+        .status(400)
+        .json({ error: `Email must belong to the domain @${allowedDomain}` });
+    }
+
     await student.update(updatedData);
     logger.info("Student updated", {
       studentId,
