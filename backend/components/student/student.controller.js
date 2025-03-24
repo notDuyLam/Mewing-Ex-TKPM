@@ -68,7 +68,7 @@ const createStudent = async (req, res) => {
     if (!validateEmailDomain(email)) {
       return res
         .status(400)
-        .json({ error: `Email must belong to the domain @${allowedDomain}` });
+        .json({ message: `Email must belong to the domain @${allowedDomain}` });
     }
 
     const studentData = {
@@ -125,7 +125,7 @@ const updateStudent = async (req, res) => {
     if (!validateEmailDomain(email)) {
       return res
         .status(400)
-        .json({ error: `Email must belong to the domain @${allowedDomain}` });
+        .json({ message: `Email must belong to the domain @${allowedDomain}` });
     }
 
     await student.update(updatedData);
