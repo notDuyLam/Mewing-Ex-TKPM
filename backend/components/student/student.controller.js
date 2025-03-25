@@ -101,6 +101,44 @@ const createStudent = async (req, res) => {
   }
 };
 
+const verifyStudentStatus = async (studentId, newStatusId) => {
+  try {
+    const newStatus = await Status.findByPk(newStatusId);
+    if (!newStatus) {
+      return { valid: false, message: "Status not found" };
+    }
+    
+    const student = await Student.findByPk(studentId, {
+      include: [
+        { model: Status, as: "status" }
+      ]
+    });
+    
+    if (!student) {
+      return { valid: false, message: "Student not found" };
+    }
+    
+    const currentStatusName = student.status ? student.status.name : null;
+    const newStatusName = newStatus.name;
+    
+    // Check invalid status changes
+    if ((currentStatusName === "Bảo lưu" || 
+         currentStatusName === "Tốt nghiệp" || 
+         currentStatusName === "Đình chỉ") && 
+        newStatusName === "Đang học") {
+      return { 
+        valid: false, 
+        message: "Thay đổi tình trạng sinh viên không hợp lệ" 
+      };
+    }
+    
+    return { valid: true };
+  } catch (error) {
+    logger.error("Error verifying student status", { error: error.message });
+    return { valid: false, message: "Error verifying status" };
+  }
+};
+
 const updateStudent = async (req, res) => {
   try {
     const studentId = req.params.studentId;
@@ -109,6 +147,22 @@ const updateStudent = async (req, res) => {
       logger.warn("Student not found for update", { studentId });
       return res.status(404).json({ error: "Student not found" });
     }
+
+    
+    const statusValidation = await verifyStudentStatus(studentId, req.body.statusId);
+    if (!statusValidation.valid) {
+      logger.warn("Invalid status change", { 
+        studentId, 
+        currentStatusId: student.statusId, 
+        requestedStatusId: req.body.statusId,
+        message: statusValidation.message
+      });
+      return res.status(400).json({ message: statusValidation.message });
+    }
+    
+
+    // Get email from request body or existing student data
+    const email = req.body.email || student.email;
 
     const updatedData = {
       fullName: req.body.fullName || student.fullName,
