@@ -1,6 +1,7 @@
 // components/AddStudentButton.tsx
 "use client";
 
+import validationPhoneNumber from "@/validation/phoneNumber";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -186,13 +187,18 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
       toast.error("Email không đúng định dạng");
       return false;
     }
-
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(newStudent.phoneNumber)) {
-      toast.error("Số điện thoại phải là 10 chữ số");
-      return false;
+    let isPhoneNumberValid = false;
+    for(let i = 0; i < validationPhoneNumber.allowedPhoneNumbers.length; i++) {
+        const phoneRegex = new RegExp(validationPhoneNumber.allowedPhoneNumbers[i].regex);
+        if (phoneRegex.test(newStudent.phoneNumber)) {
+            isPhoneNumberValid = true;
+        }
     }
-
+    if(!isPhoneNumberValid) {
+        const allowedCountries = validationPhoneNumber.allowedPhoneNumbers.map((e) => e.name);
+        toast.error(`Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(", ")}`);
+        return false;
+    }
     // Validate IdentityDocuments
     if (newIdentityDocuments.identityType) {
       if (!newIdentityDocuments.identityNumber.trim()) {
@@ -351,7 +357,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               disabled={isLoading}
             />
             <Input
-              placeholder="Số điện thoại"
+              placeholder="Số điện thoại (vd: +84123456789)"
               value={newStudent.phoneNumber}
               onChange={(e) => setNewStudent({ ...newStudent, phoneNumber: e.target.value })}
               disabled={isLoading}

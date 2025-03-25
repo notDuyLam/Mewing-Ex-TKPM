@@ -171,7 +171,12 @@ export default function StudentDetailPage({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editStudent),
       });
-      if (!studentRes.ok) throw new Error("Failed to update student");
+      if(studentRes.status === 400){
+        const data = await studentRes.json(); // Chờ lấy dữ liệu JSON
+        toast.info(data.message);
+        return;
+      }
+        
 
       if (student?.details) {
         const detailsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-details/${editStudent.studentId}`, {
