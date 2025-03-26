@@ -1,7 +1,6 @@
 // components/AddStudentButton.tsx
 "use client";
 
-import validationPhoneNumber from "@/validation/phoneNumber";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -188,14 +187,15 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
       return false;
     }
     let isPhoneNumberValid = false;
-    for(let i = 0; i < validationPhoneNumber.allowedPhoneNumbers.length; i++) {
-        const phoneRegex = new RegExp(validationPhoneNumber.allowedPhoneNumbers[i].regex);
+    const validationPhoneNumber = JSON.parse(process.env.NEXT_PUBLIC_ALLOWED_PHONE_NUMBERS || "[]");
+    for(let i = 0; i < validationPhoneNumber.length; i++) {
+        const phoneRegex = new RegExp(validationPhoneNumber[i].regex);
         if (phoneRegex.test(newStudent.phoneNumber)) {
             isPhoneNumberValid = true;
         }
     }
     if(!isPhoneNumberValid) {
-        const allowedCountries = validationPhoneNumber.allowedPhoneNumbers.map((e) => e.name);
+        const allowedCountries = validationPhoneNumber.map((e: any) => e.name);
         toast.error(`Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(", ")}`);
         return false;
     }

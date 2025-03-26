@@ -1,3 +1,4 @@
+require('dotenv').config();
 const db = require("../../models");
 const Student = db.Student;
 const Department = db.Department;
@@ -12,7 +13,7 @@ function validateEmailDomain(email) {
   return emailDomain === allowedDomain;
 }
 function validationPhoneNumber(phoneNumber) {
-  const allowedPhoneNumbers = require("../../validation/phoneNumber").allowedPhoneNumbers;
+  const allowedPhoneNumbers = JSON.parse(process.env.ALLOWED_PHONE_NUMBERS);
   for (let i = 0; i < allowedPhoneNumbers.length; i++) {
     if (new RegExp(allowedPhoneNumbers[i].regex).test(phoneNumber)) {
       return true;
@@ -81,7 +82,7 @@ const createStudent = async (req, res) => {
     }
 
     if(!validationPhoneNumber(phoneNumber)){
-        const allowedCountries = require("../../validation/phoneNumber").allowedPhoneNumbers.map((e) => e.name);
+        const allowedCountries = JSON.parse(process.env.ALLOWED_PHONE_NUMBERS).map((e) => e.name);
         logger.warn("Invalid phone number", { studentId });
         return res
         .status(400)
@@ -194,7 +195,7 @@ const updateStudent = async (req, res) => {
     };
 
     if(!validationPhoneNumber(updatedData.phoneNumber)){
-      const allowedCountries = require("../../validation/phoneNumber").allowedPhoneNumbers.map((e) => e.name);
+      const allowedCountries = JSON.parse(process.env.ALLOWED_PHONE_NUMBERS).map((e) => e.name);
       logger.warn("Invalid phone number", { studentId });
       return res
       .status(400)
