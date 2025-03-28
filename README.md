@@ -27,6 +27,7 @@ Student Management
     DB_PORT=
     DB_DIALECT=
     ALLOWED_EMAIL_DOMAIN=student.hcmus.edu.vn
+   ALLOWED_PHONE_NUMBERS=[{"code":"VN","name":"Vietnam","regex":"^\\+84\\d{9,10}$"},{"code":"US","name":"United States","regex":"^\\+1\\d{10}$"},{"code":"UK","name":"United Kingdom","regex":"^\\+44\\d{10}$"}]
    ```
 
 - **PORT**: Cổng chạy ứng dụng Node.js
@@ -59,6 +60,7 @@ Student Management
 3.  Tạo file <b>.env.local</b> với cấu trúc như <b>.env.example</b>
     ```
     NEXT_PUBLIC_API_URL=
+    NEXT_PUBLIC_ALLOWED_PHONE_NUMBERS=[{"code":"VN","name":"Vietnam","regex":"^\\+84\\d{9,10}$"},{"code":"US","name":"United States","regex":"^\\+1\\d{10}$"},{"code":"UK","name":"United Kingdom","regex":"^\\+44\\d{10}$"}]
     ```
 
 - Mặc định frontend chạy <b>PORT 3001</b>, để tùy chỉnh vào file <b>package.json</b>
