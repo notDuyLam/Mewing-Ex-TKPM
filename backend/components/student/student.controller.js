@@ -1,3 +1,4 @@
+require('dotenv').config();
 const db = require("../../models");
 const Student = db.Student;
 const Department = db.Department;
@@ -10,6 +11,15 @@ const allowedDomain = process.env.ALLOWED_EMAIL_DOMAIN;
 function validateEmailDomain(email) {
   const emailDomain = email.split("@")[1];
   return emailDomain === allowedDomain;
+}
+function validationPhoneNumber(phoneNumber) {
+  const allowedPhoneNumbers = JSON.parse(process.env.ALLOWED_PHONE_NUMBERS);
+  for (let i = 0; i < allowedPhoneNumbers.length; i++) {
+    if (new RegExp(allowedPhoneNumbers[i].regex).test(phoneNumber)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 const { Op } = require("sequelize");
@@ -70,6 +80,14 @@ const createStudent = async (req, res) => {
         .status(400)
         .json({ message: `Email phải thuộc tên miền @${allowedDomain}` });
     }
+
+    if(!validationPhoneNumber(phoneNumber)){
+        const allowedCountries = JSON.parse(process.env.ALLOWED_PHONE_NUMBERS).map((e) => e.name);
+        logger.warn("Invalid phone number", { studentId });
+        return res
+        .status(400)
+        .json({message: `Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(", ")}`});
+      }
 
     const studentData = {
       studentId,
@@ -175,6 +193,14 @@ const updateStudent = async (req, res) => {
       phoneNumber: req.body.phoneNumber || student.phoneNumber,
       statusId: req.body.statusId || student.statusId,
     };
+
+    if(!validationPhoneNumber(updatedData.phoneNumber)){
+      const allowedCountries = JSON.parse(process.env.ALLOWED_PHONE_NUMBERS).map((e) => e.name);
+      logger.warn("Invalid phone number", { studentId });
+      return res
+      .status(400)
+      .json({message: `Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(", ")}`});
+    }
 
     if (!validateEmailDomain(email)) {
       return res
