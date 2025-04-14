@@ -186,13 +186,19 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
       toast.error("Email không đúng định dạng");
       return false;
     }
-
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(newStudent.phoneNumber)) {
-      toast.error("Số điện thoại phải là 10 chữ số");
-      return false;
+    let isPhoneNumberValid = false;
+    const validationPhoneNumber = JSON.parse(process.env.NEXT_PUBLIC_ALLOWED_PHONE_NUMBERS || "[]");
+    for(let i = 0; i < validationPhoneNumber.length; i++) {
+        const phoneRegex = new RegExp(validationPhoneNumber[i].regex);
+        if (phoneRegex.test(newStudent.phoneNumber)) {
+            isPhoneNumberValid = true;
+        }
     }
-
+    if(!isPhoneNumberValid) {
+        const allowedCountries = validationPhoneNumber.map((e: any) => e.name);
+        toast.error(`Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(", ")}`);
+        return false;
+    }
     // Validate IdentityDocuments
     if (newIdentityDocuments.identityType) {
       if (!newIdentityDocuments.identityNumber.trim()) {
@@ -351,7 +357,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               disabled={isLoading}
             />
             <Input
-              placeholder="Số điện thoại"
+              placeholder="Số điện thoại (vd: +84123456789)"
               value={newStudent.phoneNumber}
               onChange={(e) => setNewStudent({ ...newStudent, phoneNumber: e.target.value })}
               disabled={isLoading}
