@@ -20,11 +20,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       year: {
-        type: DataTypes.INT,
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
       maxStudent: {
-        type: DataTypes.INT,
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
       schedule: {
@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       teacherId: {
-        type: DataTypes.INT,
+        type: DataTypes.STRING,
         allowNull: false,
       },
     },

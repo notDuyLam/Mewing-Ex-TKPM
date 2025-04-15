@@ -3,7 +3,15 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Staff extends Model {
     static associate(models) {
-      Staff.hasMany(models.Enrollment, { foreignKey: "staffId" });
+      Staff.belongsTo(models.Department, {
+        foreignKey: "departmentId",
+        as: "Department",
+      });
+
+      Staff.hasMany(models.Enrollment, {
+        foreignKey: "staffId",
+        as: "Enrollments",
+      });
     }
   }
   Staff.init(
@@ -13,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         unique: true,
       },
-      department: {
+      departmentId: {
         type: DataTypes.INTEGER,
         allowNull: false,
       },

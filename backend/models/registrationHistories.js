@@ -31,8 +31,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.ENUM("register", "cancel"),
         allowNull: false,
       },
-      performBy: {
-        type: DataTypes.INT,
+      performedBy: {
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
       performAt: {

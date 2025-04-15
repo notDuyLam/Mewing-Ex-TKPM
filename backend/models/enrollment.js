@@ -12,11 +12,11 @@ module.exports = (sequelize, DataTypes) => {
   Enrollment.init(
     {
       studentId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       classId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       registerBy: {
