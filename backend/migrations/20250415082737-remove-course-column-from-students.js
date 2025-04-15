@@ -6,7 +6,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    // Nếu rollback thì thêm lại cột `course`
     await queryInterface.addColumn("Students", "course", {
       type: Sequelize.STRING,
     });
