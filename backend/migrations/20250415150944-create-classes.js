@@ -42,7 +42,7 @@ module.exports = {
           key: "teacherId",
         },
         onUpdate: "CASCADE",
-        onDelete: "SET NULL",
+        onDelete: "CASCADE",
       },
       createdAt: {
         allowNull: false,
