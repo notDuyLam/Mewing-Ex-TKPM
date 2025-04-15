@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       preCourseId: {
-        type: DataTypes.INT,
+        type: DataTypes.STRING,
       },
     },
     {
