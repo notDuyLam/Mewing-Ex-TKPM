@@ -4,20 +4,20 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert("Enrollments", [
       {
-        name: "Enrollment 1",
-        studentId: 1001,
-        courseId: 1,
-        registerBy: 1,
+        studentId: "SV003", // Example student ID
+        classId: "C001", // Example class ID
+        registerBy: 1, // Staff who registers this enrollment
         registerAt: new Date(),
+        grade: null, // No grade assigned yet
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        name: "Enrollment 2",
-        studentId: 1002,
-        courseId: 2,
-        registerBy: 2,
+        studentId: "SV002", // Example student ID
+        classId: "C002", // Example class ID
+        registerBy: 2, // Staff who registers this enrollment
         registerAt: new Date(),
+        grade: null, // No grade assigned yet
         createdAt: new Date(),
         updatedAt: new Date(),
       },

@@ -2,22 +2,22 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.bulkInsert("Staffs", [
+    await queryInterface.bulkInsert("Teachers", [
       {
-        name: "Mark Davis",
-        departmentId: 1, // Example department ID
+        teacherId: "T001", // Example teacher ID
+        name: "John Doe",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        name: "Sarah Lee",
-        departmentId: 2, // Example department ID
+        teacherId: "T002", // Example teacher ID
+        name: "Jane Smith",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        name: "James Brown",
-        departmentId: 1, // Example department ID
+        teacherId: "T003", // Example teacher ID
+        name: "Alice Johnson",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -25,6 +25,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("Staffs", null, {});
+    await queryInterface.bulkDelete("Teachers", null, {});
   },
 };
