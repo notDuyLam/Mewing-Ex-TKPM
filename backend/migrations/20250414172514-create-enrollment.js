@@ -22,7 +22,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      staffId: {
+      registerBy: {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
