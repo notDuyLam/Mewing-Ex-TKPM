@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const db = require("../../models");
 const Student = db.Student;
 const Department = db.Department;
@@ -85,13 +85,17 @@ const createStudent = async (req, res) => {
         .json({ message: `Email phải thuộc tên miền @${allowedDomain}` });
     }
 
-    if(!validationPhoneNumber(phoneNumber)){
-        const allowedCountries = JSON.parse(process.env.ALLOWED_PHONE_NUMBERS).map((e) => e.name);
-        logger.warn("Invalid phone number", { studentId });
-        return res
-        .status(400)
-        .json({message: `Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(", ")}`});
-      }
+    if (!validationPhoneNumber(phoneNumber)) {
+      const allowedCountries = JSON.parse(
+        process.env.ALLOWED_PHONE_NUMBERS
+      ).map((e) => e.name);
+      logger.warn("Invalid phone number", { studentId });
+      return res.status(400).json({
+        message: `Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(
+          ", "
+        )}`,
+      });
+    }
 
     const studentData = {
       studentId,
@@ -129,31 +133,31 @@ const verifyStudentStatus = async (studentId, newStatusId) => {
     if (!newStatus) {
       return { valid: false, message: "Status not found" };
     }
-    
+
     const student = await Student.findByPk(studentId, {
-      include: [
-        { model: Status, as: "status" }
-      ]
+      include: [{ model: Status, as: "status" }],
     });
-    
+
     if (!student) {
       return { valid: false, message: "Student not found" };
     }
-    
+
     const currentStatusName = student.status ? student.status.name : null;
     const newStatusName = newStatus.name;
-    
+
     // Check invalid status changes
-    if ((currentStatusName === "Bảo lưu" || 
-         currentStatusName === "Tốt nghiệp" || 
-         currentStatusName === "Đình chỉ") && 
-        newStatusName === "Đang học") {
-      return { 
-        valid: false, 
-        message: "Thay đổi tình trạng sinh viên không hợp lệ" 
+    if (
+      (currentStatusName === "Bảo lưu" ||
+        currentStatusName === "Tốt nghiệp" ||
+        currentStatusName === "Đình chỉ") &&
+      newStatusName === "Đang học"
+    ) {
+      return {
+        valid: false,
+        message: "Thay đổi tình trạng sinh viên không hợp lệ",
       };
     }
-    
+
     return { valid: true };
   } catch (error) {
     logger.error("Error verifying student status", { error: error.message });
@@ -170,18 +174,19 @@ const updateStudent = async (req, res) => {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    
-    const statusValidation = await verifyStudentStatus(studentId, req.body.statusId);
+    const statusValidation = await verifyStudentStatus(
+      studentId,
+      req.body.statusId
+    );
     if (!statusValidation.valid) {
-      logger.warn("Invalid status change", { 
-        studentId, 
-        currentStatusId: student.statusId, 
+      logger.warn("Invalid status change", {
+        studentId,
+        currentStatusId: student.statusId,
         requestedStatusId: req.body.statusId,
-        message: statusValidation.message
+        message: statusValidation.message,
       });
       return res.status(400).json({ message: statusValidation.message });
     }
-    
 
     // Get email from request body or existing student data
     const email = req.body.email || student.email;
@@ -198,12 +203,16 @@ const updateStudent = async (req, res) => {
       statusId: req.body.statusId || student.statusId,
     };
 
-    if(!validationPhoneNumber(updatedData.phoneNumber)){
-      const allowedCountries = JSON.parse(process.env.ALLOWED_PHONE_NUMBERS).map((e) => e.name);
+    if (!validationPhoneNumber(updatedData.phoneNumber)) {
+      const allowedCountries = JSON.parse(
+        process.env.ALLOWED_PHONE_NUMBERS
+      ).map((e) => e.name);
       logger.warn("Invalid phone number", { studentId });
-      return res
-      .status(400)
-      .json({message: `Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(", ")}`});
+      return res.status(400).json({
+        message: `Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(
+          ", "
+        )}`,
+      });
     }
 
     if (!validateEmailDomain(email)) {
@@ -761,5 +770,7 @@ module.exports = {
   exportToCSV,
   exportToExcel,
   importFromFile,
+  validateEmailDomain,
+  validationPhoneNumber,
   getReport,
 };

@@ -41,6 +41,9 @@ module.exports = (sequelize, DataTypes) => {
       status: {
         type: DataTypes.ENUM("activate", "deactivate"),
         allowNull: false,
+        validate: {
+          isIn: [["activate", "deactivate"]],
+        },
       },
     },
     {

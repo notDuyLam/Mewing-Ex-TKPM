@@ -45,8 +45,15 @@ Student Management
    npx sequelize-cli db:migrate
    ```
 5. Tiếp đến, tiến hành điền dữ liệu seeders
+
    ```
    npx sequelize-cli db:seed:all
+   ```
+
+6. Test
+   Để tiến hành kiểm thử và chạy các test case, sử dụng:
+   ```
+   npm test
    ```
 
 ### Frontend
