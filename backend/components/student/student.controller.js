@@ -74,7 +74,6 @@ const createStudent = async (req, res) => {
       logger.warn("Student ID already exists", { studentId });
       return res.status(409).json({ error: "Student ID already exists" });
     }
-    console.log("heelo");
 
     if (!validateEmailDomain(email)) {
       return res
