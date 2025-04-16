@@ -35,7 +35,7 @@ describe("createStudent controller", () => {
         course: "CSE101",
         programId: 1,
         email: "john@student.hcmus.edu.vn",
-        phoneNumber: "0912345678",
+        phoneNumber: "+84912345678",
         statusId: 1,
       },
       user: { id: "admin123" }, // optional

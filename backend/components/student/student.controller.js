@@ -74,6 +74,7 @@ const createStudent = async (req, res) => {
       logger.warn("Student ID already exists", { studentId });
       return res.status(409).json({ error: "Student ID already exists" });
     }
+    console.log("heelo");
 
     if (!validateEmailDomain(email)) {
       return res
@@ -86,13 +87,11 @@ const createStudent = async (req, res) => {
         process.env.ALLOWED_PHONE_NUMBERS
       ).map((e) => e.name);
       logger.warn("Invalid phone number", { studentId });
-      return res
-        .status(400)
-        .json({
-          message: `Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(
-            ", "
-          )}`,
-        });
+      return res.status(400).json({
+        message: `Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(
+          ", "
+        )}`,
+      });
     }
 
     const studentData = {
@@ -206,13 +205,11 @@ const updateStudent = async (req, res) => {
         process.env.ALLOWED_PHONE_NUMBERS
       ).map((e) => e.name);
       logger.warn("Invalid phone number", { studentId });
-      return res
-        .status(400)
-        .json({
-          message: `Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(
-            ", "
-          )}`,
-        });
+      return res.status(400).json({
+        message: `Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(
+          ", "
+        )}`,
+      });
     }
 
     if (!validateEmailDomain(email)) {
