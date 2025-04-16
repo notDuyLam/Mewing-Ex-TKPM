@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
       },
       credits: {
-        type: DataTypes.INT,
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
       departmentId: {
@@ -37,6 +37,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       preCourseId: {
         type: DataTypes.STRING,
+      },
+      status: {
+        type: DataTypes.ENUM("activate", "deactivate"),
+        allowNull: false,
       },
     },
     {
