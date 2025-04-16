@@ -125,10 +125,13 @@ const updateCourse = async (req, res) => {
         if (!course) {
             return res.status(404).json({ message: 'Course not found' });
         }
-        if (credits || preCourseId) {
+        if (credits && credits < 2) {
+            return res.status(400).json({ message: 'Credits must be greater than 1' });
+        }
+        if (credits) {
             const classes = await Class.findAll({ where: { courseId } });
             if (classes.length > 0) {
-                return res.status(400).json({ message: 'Can not update course credits/preCourse since it has classes' });
+                return res.status(400).json({ message: 'Can not update course credits since it has classes' });
             }
         }
         const updateData = {
