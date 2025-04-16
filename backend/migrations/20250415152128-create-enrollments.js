@@ -48,6 +48,11 @@ module.exports = {
         type: Sequelize.FLOAT,
         allowNull: true,
       },
+      status: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        defaultValue: "active",
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

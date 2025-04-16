@@ -9,6 +9,7 @@ module.exports = {
         registerBy: 1, // Staff who registers this enrollment
         registerAt: new Date(),
         grade: null, // No grade assigned yet
+        status: "active",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -18,6 +19,7 @@ module.exports = {
         registerBy: 2, // Staff who registers this enrollment
         registerAt: new Date(),
         grade: null, // No grade assigned yet
+        status: "passed",
         createdAt: new Date(),
         updatedAt: new Date(),
       },

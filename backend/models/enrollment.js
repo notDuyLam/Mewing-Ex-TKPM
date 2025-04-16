@@ -30,6 +30,10 @@ module.exports = (sequelize, DataTypes) => {
       grade: {
         type: DataTypes.FLOAT,
       },
+      status: {
+        type: DataTypes.ENUM("passed", "failed", "paused", "active"),
+        defaultValue: "active",
+      },
     },
     {
       sequelize,

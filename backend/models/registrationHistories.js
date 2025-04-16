@@ -23,10 +23,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      credits: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
       action: {
         type: DataTypes.ENUM("register", "cancel"),
         allowNull: false,
