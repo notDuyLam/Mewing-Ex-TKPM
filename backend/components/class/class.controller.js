@@ -1,6 +1,8 @@
 const db = require("../../models");
 const Course = db.Course;
 const Class = db.Class;
+const Enrollment = db.Enrollment;
+const Student = db.Student;
 
 const createClass = async (req, res) => {
     try {
@@ -76,14 +78,22 @@ const getClassById = async (req, res) => {
     }
 };
 
-const getClassesByCourseId = async (req, res) => {
+const getStudents = async (req, res) => {
     try {
-        const { courseId } = req.params;
-        const classes = await Class.findAll({ where: { courseId } });
-        return res.status(200).json(classes);
-    } catch (error) {    
+        const { classId } = req.params;
+        const classEntity = await Class.findByPk(classId);
+        if (!classEntity) {
+            return res.status(404).json({ message: "Class not found" });
+        }
+        const enrollments = await Enrollment.findAll({ where: { classId }, 
+            include: [
+                { model: Student, as: "Student" },
+            ]
+        });
+        return res.status(200).json(enrollments);
+    } catch (error) {
         return res.status(500).json({
-            message: "Error retrieving classes",
+            message: "Error retrieving student count",
             error: error.message,
         });
     }
@@ -135,6 +145,6 @@ module.exports = {
     createClass, 
     getAllClasses, 
     getClassById, 
-    getClassesByCourseId,
+    getStudents,
     updateClass 
 };

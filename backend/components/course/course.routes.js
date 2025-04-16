@@ -11,5 +11,6 @@ router.put('/:courseId', courseController.updateCourse);
 // Cập nhật khóa học - courseName, credits, departmentId, preCourseId, description
 router.get('/', courseController.getAllCourses); // Lấy tất cả khóa học
 router.get('/:courseId', courseController.getCourseById); // Lấy khóa học theo ID
+router.get('/:courseId/classes', courseController.getClasses); // Lấy lớp học của khóa học
 
 module.exports = router;

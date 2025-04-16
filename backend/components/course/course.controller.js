@@ -187,6 +187,19 @@ const getCourseById = async (req, res) => {
     }
 }
 
+const getClasses = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const classes = await Class.findAll({ where: { courseId } });
+        return res.status(200).json(classes);
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error retrieving classes',
+            error: error.message
+        });
+    }
+}
+
 module.exports = {
     createCourse,
     deleteCourse,
@@ -194,6 +207,7 @@ module.exports = {
     updateCourse,
     getStatus,
     getAllCourses,
-    getCourseById
+    getCourseById,
+    getClasses
 };
 
