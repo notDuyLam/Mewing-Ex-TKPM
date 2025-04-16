@@ -24,6 +24,8 @@ router.get('/export/excel', studentController.exportToExcel);
 // Route import
 router.post('/import', upload.single('file'), studentController.importFromFile);
 
+// Route register class
+router.get('/:studentId/registered-class', studentController.getRegisteredClass);
 // Route report
 router.get('/report/id/:studentId', studentController.getReport);
 

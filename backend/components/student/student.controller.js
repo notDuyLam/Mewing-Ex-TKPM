@@ -725,6 +725,23 @@ const importFromFile = async (req, res) => {
   }
 };
 
+const getRegisteredClass = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const classes = await Enrollment.findAll({ where: { studentId, status: { [Op.in]: ["active", "paused"] } },
+        include: [{ model: Class, as: "Class" }] });
+    res.status(200).json(classes);
+  } catch (error) {
+    logger.error("Error retrieving registered classes", {
+      error: error.message,
+      studentId: req.params.studentId,
+    });
+    res
+      .status(500)
+      .json({ error: "Internal server error", details: error.message });
+  }
+}
+
 const getReport = async (req, res) => {
   try {
     const {studentId} = req.params;
@@ -772,5 +789,6 @@ module.exports = {
   importFromFile,
   validateEmailDomain,
   validationPhoneNumber,
+  getRegisteredClass,
   getReport,
 };
