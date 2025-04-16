@@ -18,7 +18,7 @@ module.exports = {
         classId: "C002", // Example class ID
         registerBy: 2, // Staff who registers this enrollment
         registerAt: new Date(),
-        grade: null, // No grade assigned yet
+        grade: 9, // No grade assigned yet
         status: "passed",
         createdAt: new Date(),
         updatedAt: new Date(),

@@ -4,8 +4,12 @@ const Student = db.Student;
 const Department = db.Department;
 const Status = db.Status;
 const Program = db.Program;
+const Enrollment = db.Enrollment;
 const StudentDetails = db.StudentDetails;
 const IdentityDocuments = db.IdentityDocuments;
+const Course = db.Course;
+const Class = db.Class;
+const Semester = db.Semester;
 const allowedDomain = process.env.ALLOWED_EMAIL_DOMAIN;
 
 function validateEmailDomain(email) {
@@ -712,6 +716,42 @@ const importFromFile = async (req, res) => {
   }
 };
 
+const getReport = async (req, res) => {
+  try {
+    const {studentId} = req.params;
+    const student = await Student.findByPk(studentId, {
+        include: [
+            { model: Department, as: "department" },
+            { model: Status, as: "status" },
+            { model: Program, as: "program" },
+        ]
+    });
+    if (!student) {
+        return res.status(404).json({ error: "Student not found" });
+    }
+    const grades = await Enrollment.findAll({ where: { studentId: studentId },
+        include: [
+            {model: Class, as: "Class", include: [
+                {model: Semester, as: "Semester"},
+                {model: Course, as: "Course"}
+            ]},
+        ]
+    });
+
+    const report = {
+        student,
+        grades
+    };
+    res.status(200).json(report);
+  }catch (error) {
+    logger.error("Error retrieving report", {
+      studentId: req.params.studentId,
+      error: error.message,
+    });
+    res.status(500).json({ error: "Error retrieving report: " + error.message });
+  }
+};
+
 module.exports = {
   getStudentById,
   createStudent,
@@ -721,4 +761,5 @@ module.exports = {
   exportToCSV,
   exportToExcel,
   importFromFile,
+  getReport,
 };
