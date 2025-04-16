@@ -30,6 +30,9 @@ module.exports = (sequelize, DataTypes) => {
       action: {
         type: DataTypes.ENUM("register", "cancel"),
         allowNull: false,
+        validate: {
+          isIn: [["register", "cancel"]],
+        },
       },
       performedBy: {
         type: DataTypes.INTEGER,
