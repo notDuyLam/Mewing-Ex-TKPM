@@ -1,6 +1,8 @@
 const db = require("../../models");
 const Course = db.Course;
 const Class = db.Class;
+const Enrollment = db.Enrollment;
+const Student = db.Student;
 
 const createClass = async (req, res) => {
     try {
@@ -17,13 +19,18 @@ const createClass = async (req, res) => {
             return value instanceof Date && !isNaN(value);
         };
         if (isValidDate(schedule)) {
-            return res.status(400).json({ message: 'Schedule must be a valid date' });
+            return res.status(400).json({ message: 'Schedule must be a valid time' });
         }
         
         // Kiểm tra course ID
         const course = await Course.findByPk(courseId);
         if (!course) {
             return res.status(404).json({ message: "Course not found" });
+        }
+        if (course) {
+            if (course.status === 'deactivate') {
+                return res.status(400).json({ message: "Course is deactive" });
+            }
         }
         // Kiểm tra class ID có tồn tại hay chưa
         if (await Class.findOne({ where: { classId } })) {
@@ -76,15 +83,52 @@ const getClassById = async (req, res) => {
     }
 };
 
-const updateClass = async (req, res) => {
+const getStudents = async (req, res) => {
     try {
         const { classId } = req.params;
-        const { year, semesterId, teacherId, maxStudent, schedule, room } = req.body;
         const classEntity = await Class.findByPk(classId);
         if (!classEntity) {
             return res.status(404).json({ message: "Class not found" });
         }
+        const enrollments = await Enrollment.findAll({ where: { classId }, 
+            include: [
+                { model: Student, as: "Student" },
+            ]
+        });
+        return res.status(200).json(enrollments);
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error retrieving student count",
+            error: error.message,
+        });
+    }
+};
+
+const updateClass = async (req, res) => {
+    try {
+        const { classId } = req.params;
+        const { courseId, year, semesterId, teacherId, maxStudent, schedule, room } = req.body;
+        const classEntity = await Class.findByPk(classId);
+        if (!classEntity) {
+            return res.status(404).json({ message: "Class not found" });
+        }
+        // Kiểm tra tính hợp lệ của schedule
+        const isValidDate = (value) => {
+            return value instanceof Date && !isNaN(value);
+        };
+        if (schedule && isValidDate(schedule)) {
+            return res.status(400).json({ message: 'Schedule must be a valid time' });
+        }
+        
+        // Kiểm tra course ID
+        if (courseId) {
+            const course = await Course.findByPk(courseId);
+            if (!course) {
+                return res.status(404).json({ message: "Course not found" });
+            }
+        }
         const updateData = {
+            courseId: courseId || classEntity.courseId,
             year: year || classEntity.year,
             semesterId: semesterId || classEntity.semesterId,
             teacherId: teacherId || classEntity.teacherId,
@@ -106,5 +150,6 @@ module.exports = {
     createClass, 
     getAllClasses, 
     getClassById, 
+    getStudents,
     updateClass 
 };

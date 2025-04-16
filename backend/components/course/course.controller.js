@@ -125,10 +125,21 @@ const updateCourse = async (req, res) => {
         if (!course) {
             return res.status(404).json({ message: 'Course not found' });
         }
-        if (credits || preCourseId) {
+        // Số tín chỉ phải >= 2
+        if (credits && credits < 2) {
+            return res.status(400).json({ message: 'Credits must be greater than 1' });
+        }
+        // Kiểm tra môn tiên quyết
+        if (preCourseId) {
+            const isPreCourseExist = await Course.findOne({ where: { courseId: preCourseId } });
+            if (!isPreCourseExist) {
+                return res.status(400).json({ message: 'PreCourseId is not existed' });
+            }
+        }
+        if (credits) {
             const classes = await Class.findAll({ where: { courseId } });
             if (classes.length > 0) {
-                return res.status(400).json({ message: 'Can not update course credits/preCourse since it has classes' });
+                return res.status(400).json({ message: 'Can not update course credits since it has classes' });
             }
         }
         const updateData = {
@@ -176,6 +187,19 @@ const getCourseById = async (req, res) => {
     }
 }
 
+const getClasses = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const classes = await Class.findAll({ where: { courseId } });
+        return res.status(200).json(classes);
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error retrieving classes',
+            error: error.message
+        });
+    }
+}
+
 module.exports = {
     createCourse,
     deleteCourse,
@@ -183,6 +207,7 @@ module.exports = {
     updateCourse,
     getStatus,
     getAllCourses,
-    getCourseById
+    getCourseById,
+    getClasses
 };
 
