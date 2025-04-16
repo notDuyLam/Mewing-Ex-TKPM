@@ -1,5 +1,7 @@
 "use strict";
 
+const semester = require("../models/semester");
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert("Classes", [
@@ -11,6 +13,7 @@ module.exports = {
         schedule: "09:00:00", // Time format (HH:MM:SS)
         room: "Room A101",
         teacherId: "T001", // Assign Teacher (FK from Teachers table)
+        semesterId: "1", // Assign Semester (FK from Semesters table)
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -22,6 +25,7 @@ module.exports = {
         schedule: "11:00:00", // Time format (HH:MM:SS)
         room: "Room B202",
         teacherId: "T002", // Assign Teacher (FK from Teachers table)
+        semesterId: "1", // Assign Semester (FK from Semesters table)
         createdAt: new Date(),
         updatedAt: new Date(),
       },
