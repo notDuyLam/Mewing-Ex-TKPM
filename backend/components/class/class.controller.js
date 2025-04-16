@@ -17,7 +17,7 @@ const createClass = async (req, res) => {
             return value instanceof Date && !isNaN(value);
         };
         if (isValidDate(schedule)) {
-            return res.status(400).json({ message: 'Schedule must be a valid date' });
+            return res.status(400).json({ message: 'Schedule must be a valid time' });
         }
         
         // Kiểm tra course ID
@@ -79,12 +79,28 @@ const getClassById = async (req, res) => {
 const updateClass = async (req, res) => {
     try {
         const { classId } = req.params;
-        const { year, semesterId, teacherId, maxStudent, schedule, room } = req.body;
+        const { courseId, year, semesterId, teacherId, maxStudent, schedule, room } = req.body;
         const classEntity = await Class.findByPk(classId);
         if (!classEntity) {
             return res.status(404).json({ message: "Class not found" });
         }
+        // Kiểm tra tính hợp lệ của schedule
+        const isValidDate = (value) => {
+            return value instanceof Date && !isNaN(value);
+        };
+        if (schedule && isValidDate(schedule)) {
+            return res.status(400).json({ message: 'Schedule must be a valid time' });
+        }
+        
+        // Kiểm tra course ID
+        if (courseId) {
+            const course = await Course.findByPk(courseId);
+            if (!course) {
+                return res.status(404).json({ message: "Course not found" });
+            }
+        }
         const updateData = {
+            courseId: courseId || classEntity.courseId,
             year: year || classEntity.year,
             semesterId: semesterId || classEntity.semesterId,
             teacherId: teacherId || classEntity.teacherId,

@@ -125,8 +125,16 @@ const updateCourse = async (req, res) => {
         if (!course) {
             return res.status(404).json({ message: 'Course not found' });
         }
+        // Số tín chỉ phải >= 2
         if (credits && credits < 2) {
             return res.status(400).json({ message: 'Credits must be greater than 1' });
+        }
+        // Kiểm tra môn tiên quyết
+        if (preCourseId) {
+            const isPreCourseExist = await Course.findOne({ where: { courseId: preCourseId } });
+            if (!isPreCourseExist) {
+                return res.status(400).json({ message: 'PreCourseId is not existed' });
+            }
         }
         if (credits) {
             const classes = await Class.findAll({ where: { courseId } });
