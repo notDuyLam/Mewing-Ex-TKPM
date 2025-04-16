@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
       preCourseId: {
         type: DataTypes.STRING,
       },
+      status: {
+        type: DataTypes.ENUM("activate", "deactivate"),
+        allowNull: false,
+      },
     },
     {
       sequelize,

@@ -10,6 +10,7 @@ module.exports = {
         departmentId: 1, // Example department ID
         description: "A basic course to introduce computer science concepts.",
         preCourseId: null, // No prerequisite for this course
+        status: "activate", // thêm dòng này
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -20,6 +21,7 @@ module.exports = {
         departmentId: 1, // Example department ID
         description: "Study of fundamental data structures and algorithms.",
         preCourseId: "CSE101", // Prerequisite course
+        status: "deactivate", // thêm dòng này
         createdAt: new Date(),
         updatedAt: new Date(),
       },
