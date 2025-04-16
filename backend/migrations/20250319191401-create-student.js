@@ -17,6 +17,9 @@ module.exports = {
       gender: {
         type: Sequelize.STRING
       },
+      course: {
+        type: Sequelize.STRING
+      },
       department: {
         type: Sequelize.STRING
       },

@@ -1,5 +1,7 @@
 "use strict";
 
+const semester = require("../models/semester");
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("Classes", {
@@ -40,6 +42,16 @@ module.exports = {
         references: {
           model: "Teachers",
           key: "teacherId",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      semesterId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Semesters",
+          key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",

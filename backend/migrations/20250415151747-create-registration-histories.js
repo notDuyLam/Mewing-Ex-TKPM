@@ -29,10 +29,6 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      credits: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
       action: {
         type: Sequelize.ENUM("register", "cancel"),
         allowNull: false,
