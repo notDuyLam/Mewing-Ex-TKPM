@@ -17,8 +17,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose, // Thêm DialogClose
+  DialogClose,
 } from "@/components/ui/dialog";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuList,
+  NavigationMenuLink,
+} from "@/components/ui/navigation-menu";
 
 interface Department {
   id: number;
@@ -138,7 +144,6 @@ export default function Home() {
 
   const handleDelete = async () => {
     try {
-      // Gửi request DELETE cho từng studentId
       const deletePromises = selectedStudents.map((studentId) =>
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/${studentId}`, {
           method: "DELETE",
@@ -147,14 +152,12 @@ export default function Home() {
           if (!res.ok) {
             throw new Error(`Failed to delete student ${studentId}`);
           }
-          return studentId; // Trả về studentId để lọc sau
+          return studentId;
         })
       );
-  
-      // Chờ tất cả request hoàn tất
+
       const deletedIds = await Promise.all(deletePromises);
-  
-      // Cập nhật state sau khi xóa thành công
+
       setStudents(students.filter((student) => !deletedIds.includes(student.studentId)));
       setSelectedStudents([]);
       if (students.length === deletedIds.length && pagination.currentPage > 1) {
@@ -170,52 +173,81 @@ export default function Home() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Danh sách Sinh viên</h1>
-      <div className="flex justify-between mb-4 flex-col">
-        <FilterSection onSearch={handleSearch} />
-        
-        <div className="flex gap-4 mb-4">
-          <AddStudentButton onStudentAdded={handleStudentAdded} />
-          <ManageOptionsButton onOptionsUpdated={handleOptionsUpdated} />
-          {selectedStudents.length > 0 && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="destructive">Xóa {selectedStudents.length} sinh viên</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Xác nhận xóa</DialogTitle>
-                  <DialogDescription>
-                    Bạn có chắc muốn xóa {selectedStudents.length} sinh viên đã chọn? Hành động này không thể hoàn tác.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Hủy</Button>
-                  </DialogClose>
-                  <Button variant="destructive" onClick={handleDelete}>
-                    Xóa
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
+    // Nav-menu
+    <div className="min-h-screen bg-gray-100">
+      <NavigationMenu className="bg-white shadow-md p-4 max-w-full">
+        <NavigationMenuList className="flex justify-between items-center container mx-auto">
+          <div className="flex items-center gap-6">
+            <NavigationMenuItem>
+              <NavigationMenuLink href="/" className="text-lg font-semibold text-gray-100 bg-gray-800">
+                Quản lý Sinh viên
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <NavigationMenuLink href="/courses" className="text-lg font-semibold text-gray-100 bg-gray-800">
+                Quản lý Khóa học
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <NavigationMenuLink href="/" className="text-lg font-semibold text-gray-100 bg-gray-800">
+                Quản lý Lớp học
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            
+          </div>
+        </NavigationMenuList>
+      </NavigationMenu>
+      {/* Nav - menu --- */}
+
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Danh sách Sinh viên</h1>
+        <div className="flex justify-between mb-4 flex-col">
+          <FilterSection onSearch={handleSearch} />
+          
+          <div className="flex gap-4 mb-4">
+            <AddStudentButton onStudentAdded={handleStudentAdded} />
+            <ManageOptionsButton onOptionsUpdated={handleOptionsUpdated} />
+            {selectedStudents.length > 0 && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="destructive">Xóa {selectedStudents.length} sinh viên</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Xác nhận xóa</DialogTitle>
+                    <DialogDescription>
+                      Bạn có chắc muốn xóa {selectedStudents.length} sinh viên đã chọn? Hành động này không thể hoàn tác.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant="outline">Hủy</Button>
+                    </DialogClose>
+                    <Button variant="destructive" onClick={handleDelete}>
+                      Xóa
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
         </div>
-      </div>
-      
-      <StudentTable
-        students={students}
-        totalPages={pagination.totalPages}
-        currentPage={pagination.currentPage}
-        pageSize={pagination.pageSize}
-        onPageChange={handlePageChange}
-        onDelete={setSelectedStudents}
-      />
-      
-      <div className="flex gap-4 float-end mb-4">
-        <ExportButton />
-        <ImportButton onOptionsUpdated={handleOptionsUpdated} />
+        
+        <StudentTable
+          students={students}
+          totalPages={pagination.totalPages}
+          currentPage={pagination.currentPage}
+          pageSize={pagination.pageSize}
+          onPageChange={handlePageChange}
+          onDelete={setSelectedStudents}
+        />
+        
+        <div className="flex gap-4 float-end mb-4">
+          <ExportButton />
+          <ImportButton onOptionsUpdated={handleOptionsUpdated} />
+        </div>
       </div>
     </div>
   );
