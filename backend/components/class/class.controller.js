@@ -27,6 +27,11 @@ const createClass = async (req, res) => {
         if (!course) {
             return res.status(404).json({ message: "Course not found" });
         }
+        if (course) {
+            if (course.status === 'deactivate') {
+                return res.status(400).json({ message: "Course is deactive" });
+            }
+        }
         // Kiểm tra class ID có tồn tại hay chưa
         if (await Class.findOne({ where: { classId } })) {
             return res.status(400).json({ message: "Class already exists" });
