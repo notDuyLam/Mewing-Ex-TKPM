@@ -53,6 +53,7 @@ interface StudentDetails {
 }
 
 interface IdentityDocuments {
+  id: string;
   identityType: string;
   identityNumber: string;
   issueDate: string;
@@ -360,14 +361,18 @@ export default function StudentDetailPage({
       if (student?.identity) {
         if (editIdentity?.identityType) {
           const identityRes = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/identity-documents/student/${editStudent.studentId}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/identity-documents/${editStudent?.identity?.id}`,
             {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ ...editIdentity, studentId: editStudent.studentId }),
             }
           );
-          if (!identityRes.ok) throw new Error("Failed to update identity documents");
+          if (!identityRes.ok) {
+            const _data = await identityRes;
+            console.log(editStudent);
+            return;
+          }
         }
       } else if (editIdentity?.identityType) {
         const identityRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/identity-documents`, {
