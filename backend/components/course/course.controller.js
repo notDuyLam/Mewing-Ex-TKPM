@@ -1,6 +1,7 @@
 const db = require("../../models");
 const Course = db.Course;
 const Class = db.Class;
+const Department = db.Department;
 
 const createCourse = async (req, res) => {
     try {
@@ -161,7 +162,13 @@ const updateCourse = async (req, res) => {
 
 const getAllCourses = async (req, res) => {
     try {
-        const courses = await Course.findAll();
+        const courses = await Course.findAll({
+            include: {
+                model: Department,
+                as: 'Department',
+            },
+            order: [['courseId', 'ASC']]
+        });
         return res.status(200).json(courses);
     } catch (error) {
         return res.status(500).json({

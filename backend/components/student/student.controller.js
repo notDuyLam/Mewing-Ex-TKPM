@@ -729,7 +729,18 @@ const getRegisteredClass = async (req, res) => {
   try {
     const { studentId } = req.params;
     const classes = await Enrollment.findAll({ where: { studentId, status: { [Op.in]: ["active", "paused"] } },
-        include: [{ model: Class, as: "Class" }] });
+        include: [{ model: Class, as: "Class",
+          include: [
+            {
+              model: Course,
+              as: 'Course',
+            },
+            {
+              model: Semester,
+              as: 'Semester',
+            }
+          ]
+         }] });
     res.status(200).json(classes);
   } catch (error) {
     logger.error("Error retrieving registered classes", {

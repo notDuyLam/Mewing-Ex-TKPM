@@ -3,6 +3,8 @@ const Course = db.Course;
 const Class = db.Class;
 const Enrollment = db.Enrollment;
 const Student = db.Student;
+const Semester = db.Semester;
+const Teacher = db.Teacher;
 
 const createClass = async (req, res) => {
     try {
@@ -57,7 +59,14 @@ const createClass = async (req, res) => {
 
 const getAllClasses = async (req, res) => {
     try {
-        const classes = await Class.findAll();
+        const classes = await Class.findAll({
+            include: [{
+                model: Course,
+                as: 'Course'
+            },
+            {model: Semester, as:'Semester'},
+            {model: Teacher, as: 'Teacher'}]
+        });
         return res.status(200).json(classes);
     } catch (error) {
         return res.status(500).json({
