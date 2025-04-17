@@ -10,9 +10,6 @@ const createCourse = async (req, res) => {
         if (!courseId || !courseName || !credits || !departmentId, !description) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
-        if (!courseId.length || !courseName.length || !credits.length || !departmentId.length || !description.length) {
-            return res.status(400).json({ message: 'Fields cannot be empty' });
-        }
         // Kiểm tra course ID
         if (await Course.findOne({ where: { courseId } })) {
             return res.status(400).json({ message: 'CourseId is existed' });
