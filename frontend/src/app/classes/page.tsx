@@ -35,6 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
 
 interface Semester {
   id: string;
@@ -150,7 +151,6 @@ export default function Classes() {
       const uniqueSemesters = Array.from(
         new Map(data.map((s: Semester) => [s.id, s])).values()
       );
-      console.log("Fetched semesters:", uniqueSemesters);
       setSemesters(uniqueSemesters);
     } catch (error) {
       console.error("Error fetching semesters:", error);
@@ -233,7 +233,6 @@ export default function Classes() {
   };
 
   const validateFormData = (data: typeof createFormData) => {
-    // Ensure all required fields are present
     if (
       !data.classId ||
       !data.courseId ||
@@ -246,7 +245,6 @@ export default function Classes() {
       return false;
     }
 
-    // Convert fields to strings and check if they are empty after trimming
     const classId = String(data.classId).trim();
     const courseId = String(data.courseId).trim();
     const semesterId = String(data.semesterId).trim();
@@ -338,11 +336,9 @@ export default function Classes() {
       }
 
       const newSemester: Semester = await res.json();
-      console.log("Created semester:", newSemester);
-      await fetchSemesters(); // Refresh semester list
+      await fetchSemesters();
       toast.success("Học kỳ đã được tạo thành công!");
 
-      // Update form data with new semesterId, ensuring it's a string
       const semesterId = String(newSemester.id);
       if (isEditDialog) {
         setEditFormData({ ...editFormData, semesterId });
@@ -353,7 +349,6 @@ export default function Classes() {
         });
       }
 
-      // Reset semester form and hide it
       setNewSemesterData({
         year: new Date().getFullYear().toString(),
         startDate: "",
@@ -462,7 +457,7 @@ export default function Classes() {
       classId: classItem.classId,
       courseId: classItem.courseId,
       year: classItem.year,
-      semesterId: String(classItem.semesterId), // Ensure semesterId is a string
+      semesterId: String(classItem.semesterId),
       teacherId: classItem.teacherId,
       maxStudent: classItem.maxStudent,
       schedule: classItem.schedule,
@@ -839,7 +834,14 @@ export default function Classes() {
                 {classes.length > 0 ? (
                   classes.map((classItem) => (
                     <TableRow key={classItem.classId}>
-                      <TableCell>{classItem.classId}</TableCell>
+                      <TableCell>
+                        <Link
+                          href={`/classes/${classItem.classId}`}
+                          className="text-blue-600 hover:underline"
+                        >
+                          {classItem.classId}
+                        </Link>
+                      </TableCell>
                       <TableCell>
                         {classItem.Course?.courseName || "N/A"}
                       </TableCell>
