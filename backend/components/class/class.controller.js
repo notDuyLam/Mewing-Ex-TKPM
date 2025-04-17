@@ -77,7 +77,22 @@ const getAllClasses = async (req, res) => {
 const getClassById = async (req, res) => {
     try {
         const { classId } = req.params;
-        const classEntity = await Class.findByPk(classId);
+        const classEntity = await Class.findByPk(classId, {
+            include: [
+                {
+                    model: Course,
+                    as: 'Course',
+                },
+                {
+                    model: Semester,
+                    as: 'Semester',
+                },
+                {
+                    model: Teacher,
+                    as: 'Teacher',
+                }
+            ]
+        });
         if (!classEntity) {
             return res.status(404).json({ message: "Class not found" });
         }
