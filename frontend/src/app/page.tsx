@@ -191,7 +191,7 @@ export default function Home() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuLink href="/" className="text-lg font-semibold text-gray-100 bg-gray-800">
+              <NavigationMenuLink href="/classes" className="text-lg font-semibold text-gray-100 bg-gray-800">
                 Quản lý Lớp học
               </NavigationMenuLink>
             </NavigationMenuItem>
