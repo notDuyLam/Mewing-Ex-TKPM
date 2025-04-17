@@ -13,9 +13,7 @@ const createClass = async (req, res) => {
         if (!classId || !courseId || !year || !semesterId || !teacherId || !maxStudent || !schedule || !room) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
-        if (!classId.length || !courseId.length || !year.length || !semesterId.length || !teacherId.length || !maxStudent.length || !schedule.length || !room.length) {
-            return res.status(400).json({ message: 'Fields cannot be empty' });
-        }
+        
         // Kiểm tra tính hợp lệ của schedule
         const isValidDate = (value) => {
             return value instanceof Date && !isNaN(value);
