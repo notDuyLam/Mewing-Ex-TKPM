@@ -25,6 +25,13 @@ import {
   NavigationMenuList,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Department {
   id: number;
@@ -48,12 +55,9 @@ interface Student {
   gender: string;
   email: string;
   phoneNumber: string;
-  departmentId: number;
-  statusId: number;
-  programId: number;
   department: Department;
-  status: Status;
-  program: Program;
+  status?: Status;
+  program?: Program;
 }
 
 interface ApiResponse {
@@ -65,6 +69,11 @@ interface ApiResponse {
     currentPage: number;
     pageSize: number;
   };
+}
+
+interface Class {
+  classId: string; // Adjusted to match your usage
+  name: string;
 }
 
 export default function Home() {
@@ -81,7 +90,10 @@ export default function Home() {
     departmentId: "",
   });
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState<string>("");
+  const [classes, setClasses] = useState<Class[]>([]);
 
+  // Fetch students
   const fetchStudents = async (
     page: number = 1,
     filterParams = { fullName: "", studentId: "", departmentId: "" }
@@ -120,8 +132,29 @@ export default function Home() {
     }
   };
 
+  // Fetch classes for dropdown
+  const fetchClasses = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/classes`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch classes: ${res.statusText}`);
+      }
+
+      const data = await res.json();
+      setClasses(data || []);
+    } catch (error) {
+      console.error("Error fetching classes:", error);
+      toast.error("Không thể tải danh sách lớp học!");
+    }
+  };
+
   useEffect(() => {
     fetchStudents(pagination.currentPage, filters);
+    fetchClasses();
   }, []);
 
   const handleSearch = (newFilters: { fullName: string; studentId: string; departmentId: string }) => {
@@ -140,6 +173,7 @@ export default function Home() {
 
   const handleOptionsUpdated = () => {
     fetchStudents(pagination.currentPage, filters);
+    fetchClasses();
   };
 
   const handleDelete = async () => {
@@ -172,78 +206,145 @@ export default function Home() {
     }
   };
 
+  const handleRegisterClass = async () => {
+    if (!selectedClassId) {
+      toast.error("Vui lòng chọn một lớp học!");
+      return;
+    }
+
+    try {
+      // Send individual POST requests for each student
+      const registerPromises = selectedStudents.map((studentId) =>
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/enrollments`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            classId: selectedClassId,
+            studentId: studentId, // Send one student at a time
+          }),
+        }).then(async (res) => {
+          if (!res.ok) {
+            const error = await res.json();
+            toast.error(`Failed to register student ${studentId}: ${error.message || "Unknown error"}`);
+          }
+          return studentId;
+        })
+      );
+
+      const registeredIds = await Promise.all(registerPromises);
+
+      toast.success(`Đã đăng ký lớp học cho ${registeredIds.length} sinh viên!`);
+      setSelectedStudents([]);
+      setSelectedClassId("");
+    } catch (error: any) {
+      console.error("Error registering students:", error);
+      toast.error(`Đăng ký thất bại: ${error.message || "Lỗi không xác định"}`);
+    }
+  };
+
   return (
-    // Nav-menu
     <div className="min-h-screen bg-gray-100">
       <NavigationMenu className="bg-white shadow-md p-4 max-w-full">
         <NavigationMenuList className="flex justify-between items-center container mx-auto">
           <div className="flex items-center gap-6">
             <NavigationMenuItem>
-              <NavigationMenuLink href="/" className="text-lg font-semibold text-gray-100 bg-gray-800">
+              <NavigationMenuLink href="/" className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded">
                 Quản lý Sinh viên
               </NavigationMenuLink>
             </NavigationMenuItem>
-
             <NavigationMenuItem>
-              <NavigationMenuLink href="/courses" className="text-lg font-semibold text-gray-100 bg-gray-800">
+              <NavigationMenuLink href="/courses" className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded">
                 Quản lý Khóa học
               </NavigationMenuLink>
             </NavigationMenuItem>
-
             <NavigationMenuItem>
-              <NavigationMenuLink href="/classes" className="text-lg font-semibold text-gray-100 bg-gray-800">
+              <NavigationMenuLink href="/classes" className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded">
                 Quản lý Lớp học
               </NavigationMenuLink>
             </NavigationMenuItem>
-            
           </div>
         </NavigationMenuList>
       </NavigationMenu>
-      {/* Nav - menu --- */}
 
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">Danh sách Sinh viên</h1>
         <div className="flex justify-between mb-4 flex-col">
           <FilterSection onSearch={handleSearch} />
-          
           <div className="flex gap-4 mb-4">
             <AddStudentButton onStudentAdded={handleStudentAdded} />
             <ManageOptionsButton onOptionsUpdated={handleOptionsUpdated} />
             {selectedStudents.length > 0 && (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="destructive">Xóa {selectedStudents.length} sinh viên</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Xác nhận xóa</DialogTitle>
-                    <DialogDescription>
-                      Bạn có chắc muốn xóa {selectedStudents.length} sinh viên đã chọn? Hành động này không thể hoàn tác.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="outline">Hủy</Button>
-                    </DialogClose>
-                    <Button variant="destructive" onClick={handleDelete}>
-                      Xóa
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <>
+                <div className="flex items-center gap-2">
+                  <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Chọn lớp học" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {classes.map((classItem) => (
+                        <SelectItem key={classItem.classId} value={classItem.classId}>
+                          {classItem.name || classItem.classId}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button disabled={!selectedClassId}>
+                        Đăng ký lớp ({selectedStudents.length})
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Xác nhận đăng ký lớp</DialogTitle>
+                        <DialogDescription>
+                          Bạn có muốn đăng ký lớp học cho {selectedStudents.length} sinh viên đã chọn?
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline">Hủy</Button>
+                        </DialogClose>
+                        <Button onClick={handleRegisterClass}>Đăng ký</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="destructive">Xóa {selectedStudents.length} sinh viên</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Xác nhận xóa</DialogTitle>
+                      <DialogDescription>
+                        Bạn có chắc muốn xóa {selectedStudents.length} sinh viên đã chọn? Hành động này không thể hoàn tác.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline">Hủy</Button>
+                      </DialogClose>
+                      <Button variant="destructive" onClick={handleDelete}>
+                        Xóa
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </>
             )}
           </div>
         </div>
-        
+
         <StudentTable
           students={students}
           totalPages={pagination.totalPages}
           currentPage={pagination.currentPage}
           pageSize={pagination.pageSize}
           onPageChange={handlePageChange}
-          onDelete={setSelectedStudents}
+          onSelectStudents={setSelectedStudents}
         />
-        
+
         <div className="flex gap-4 float-end mb-4">
           <ExportButton />
           <ImportButton onOptionsUpdated={handleOptionsUpdated} />

@@ -57,7 +57,7 @@ interface StudentTableProps {
   currentPage: number;
   pageSize: number;
   onPageChange: (page: number) => void;
-  onDelete: (studentIds: string[]) => void;
+  onSelectStudents: (studentIds: string[]) => void; // Renamed for clarity
 }
 
 export default function StudentTable({
@@ -66,7 +66,7 @@ export default function StudentTable({
   currentPage,
   pageSize,
   onPageChange,
-  onDelete,
+  onSelectStudents,
 }: StudentTableProps) {
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
@@ -74,6 +74,7 @@ export default function StudentTable({
     if (page >= 1 && page <= totalPages && page !== currentPage) {
       onPageChange(page);
       setSelectedStudents([]);
+      onSelectStudents([]);
     }
   };
 
@@ -85,7 +86,7 @@ export default function StudentTable({
       updatedSelection = updatedSelection.filter((id) => id !== studentId);
     }
     setSelectedStudents(updatedSelection);
-    onDelete(updatedSelection); // Gửi danh sách đã chọn lên component cha
+    onSelectStudents(updatedSelection); // Pass selected IDs to parent
   };
 
   return (
@@ -100,10 +101,10 @@ export default function StudentTable({
                   if (checked) {
                     const allIds = students.map((student) => student.studentId);
                     setSelectedStudents(allIds);
-                    onDelete(allIds);
+                    onSelectStudents(allIds);
                   } else {
                     setSelectedStudents([]);
-                    onDelete([]);
+                    onSelectStudents([]);
                   }
                 }}
               />
@@ -172,9 +173,7 @@ export default function StudentTable({
             <PaginationItem>
               <PaginationPrevious
                 onClick={() => handlePageChange(currentPage - 1)}
-                className={
-                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                }
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
             {Array.from({ length: totalPages }, (_, i) => (
@@ -190,9 +189,7 @@ export default function StudentTable({
             <PaginationItem>
               <PaginationNext
                 onClick={() => handlePageChange(currentPage + 1)}
-                className={
-                  currentPage === totalPages ? "pointer-events-none opacity-50" : ""
-                }
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
           </PaginationContent>
