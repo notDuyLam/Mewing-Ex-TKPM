@@ -159,3 +159,45 @@ describe("deleteCourse", () => {
         expect(res.json).toHaveBeenCalledWith({ message: "Course status changed to deactive successfully" });
     })
 })
+
+it("should return 400 if preCourseId does not exist", async () => {
+    const courseObject = {
+        courseId: "CSE101",
+        courseName: "Software Engineering",
+        credits: 3,
+        departmentId: 1,
+        description: "A course about software engineering",
+        preCourseId: "CSE000",
+    };
+    const req = { body: courseObject };
+    const res = mockResponse();
+
+    Course.findOne.mockImplementation((query) => {
+        if (query?.where?.courseId === courseObject.preCourseId) {
+            return Promise.resolve(null); // preCourseId không tồn tại
+        }
+        return Promise.resolve(null); // courseId cũng không tồn tại
+    });
+
+    await createCourse(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: "PreCourseId is not existed" });
+});
+
+it("should return 404 if course not found", async () => {
+    const req = {
+        params: {
+            courseId: "NON_EXISTING",
+        },
+    };
+
+    const res = mockResponse();
+
+    Course.findByPk.mockResolvedValue(null); // Course không tồn tại
+
+    await deleteCourse(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: "Course not found" });
+});
