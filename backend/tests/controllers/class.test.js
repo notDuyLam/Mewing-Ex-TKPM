@@ -1,4 +1,4 @@
-const {createClass, getClassById} = require('../../components/class/class.controller');
+const {createClass, getClassById, getAllClasses, getStudents, updateClass} = require('../../components/class/class.controller');
 
 jest.mock('../../models');
 
@@ -11,6 +11,7 @@ const mockResponse = () => {
 
 const Course = require("../../models").Course;
 const Class = require("../../models").Class;
+const Enrollment = require("../../models").Enrollment;
 
 describe("createClass", () => {
     beforeEach(() => {
@@ -169,3 +170,99 @@ describe("getClassById", () => {
         expect(res.json).toHaveBeenCalledWith({ message: "Class not found" });
     })
 })
+
+describe("getAllClasses", () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it("should return all classes successfully", async () => {
+        const req = {}
+        const res = mockResponse();
+
+        const mockClasses = [
+            {
+                classId: "C123",
+                Course: { title: "Intro to CS" },
+                Semester: { id: 1 },
+                Teacher: { name: "Ngoc Dang" }
+            }
+        ];
+
+        Class.findAll.mockResolvedValue(mockClasses);
+
+        await getAllClasses(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(mockClasses);
+    });
+});
+
+describe("getStudents", () => {
+    it("should return list of students in a class", async () => {
+        const req = {
+            params: {
+                classId: "C123"
+            }
+        };
+        const res = mockResponse();
+
+        // Giả lập class tồn tại
+        Class.findByPk.mockResolvedValue({ classId: "C123" });
+
+        // Giả lập danh sách enrollment
+        const mockEnrollments = [
+            {
+                studentId: "S001",
+                Student: { name: "Alice" }
+            }
+        ];
+        Enrollment.findAll.mockResolvedValue(mockEnrollments);
+
+        await getStudents(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(mockEnrollments);
+    });
+});
+
+describe("updateClass", () => {
+    it("should update class successfully", async () => {
+        const req = {
+            params: { classId: "C123" },
+            body: {
+                room: "Room B202",
+                year: 2026,
+            }
+        };
+        const res = mockResponse();
+
+        const mockClass = {
+            classId: "C123",
+            courseId: "CSE101",
+            year: 2025,
+            semesterId: 1,
+            teacherId: "T123",
+            maxStudent: 30,
+            schedule: "10:00:00",
+            room: "Room A101",
+            update: jest.fn().mockResolvedValue(true)
+        };
+
+        Class.findByPk.mockResolvedValue(mockClass);
+
+        await updateClass(req, res);
+
+        expect(mockClass.update).toHaveBeenCalledWith({
+            courseId: "CSE101",
+            year: 2026,
+            semesterId: 1,
+            teacherId: "T123",
+            maxStudent: 30,
+            schedule: "10:00:00",
+            room: "Room B202"
+        });
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(mockClass);
+    });
+});

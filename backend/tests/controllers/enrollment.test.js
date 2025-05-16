@@ -101,5 +101,95 @@ describe('registerClassForStudent', () => {
         expect(res.json).toHaveBeenCalledWith({ message: "Student not found" });
 
     });
+        it('should return error if class already registered for student', async () => {
+        const fakeClass = { id: 1, maxStudent: 3, courseId: 10 };
+        const fakeStudent = { id: 1001 };
+
+        const req = {
+            body: { classId: 1, studentId: 1001 },
+            user: { id: 42 },
+        };
+        const res = mockResponse();
+
+        db.Class.findByPk.mockResolvedValue(fakeClass);
+        db.Student.findByPk.mockResolvedValue(fakeStudent);
+        db.Enrollment.findOne.mockResolvedValue({}); // Đã đăng ký rồi
+
+        await registerClassForStudent(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "Class already registered for student" });
+    });
+
+    it('should return error if class is full', async () => {
+        const fakeClass = { id: 1, maxStudent: 2, courseId: 10 };
+        const fakeStudent = { id: 1001 };
+
+        const req = {
+            body: { classId: 1, studentId: 1001 },
+            user: { id: 42 },
+        };
+        const res = mockResponse();
+
+        db.Class.findByPk.mockResolvedValue(fakeClass);
+        db.Student.findByPk.mockResolvedValue(fakeStudent);
+        db.Enrollment.findOne.mockResolvedValue(null); // Chưa đăng ký
+        db.Enrollment.count.mockResolvedValue(2); // Đã đủ chỗ
+
+        await registerClassForStudent(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "Class is full" });
+    });
+
+    it('should return error if student has not taken prerequisite course', async () => {
+        const fakeClass = { id: 1, maxStudent: 3, courseId: 10 };
+        const fakeStudent = { id: 1001 };
+        const fakeCourse = { id: 10, preCourseId: 5 };
+
+        const req = {
+            body: { classId: 1, studentId: 1001 },
+            user: { id: 42 },
+        };
+        const res = mockResponse();
+
+        db.Class.findByPk.mockResolvedValue(fakeClass);
+        db.Student.findByPk.mockResolvedValue(fakeStudent);
+        db.Enrollment.findOne.mockResolvedValueOnce(null); // Chưa đăng ký lớp này
+        db.Enrollment.count.mockResolvedValue(1); // Chưa đủ lớp
+        db.Course.findByPk.mockResolvedValue(fakeCourse);
+        db.Enrollment.findOne.mockResolvedValueOnce(null); // Chưa học môn tiên quyết
+
+        await registerClassForStudent(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "Student has not passed the prerequisite course" });
+    });
+
+    it('should return error if student has taken prerequisite but not passed', async () => {
+        const fakeClass = { id: 1, maxStudent: 3, courseId: 10 };
+        const fakeStudent = { id: 1001 };
+        const fakeCourse = { id: 10, preCourseId: 5 };
+
+        const req = {
+            body: { classId: 1, studentId: 1001 },
+            user: { id: 42 },
+        };
+        const res = mockResponse();
+
+        db.Class.findByPk.mockResolvedValue(fakeClass);
+        db.Student.findByPk.mockResolvedValue(fakeStudent);
+        db.Enrollment.findOne.mockResolvedValueOnce(null); // Chưa đăng ký lớp này
+        db.Enrollment.count.mockResolvedValue(1);
+        db.Course.findByPk.mockResolvedValue(fakeCourse);
+        db.Enrollment.findOne.mockResolvedValueOnce({
+            status: 'failed' // Đã học nhưng trượt
+        });
+
+        await registerClassForStudent(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "Student has not passed the prerequisite course" });
+    });
 
 });
