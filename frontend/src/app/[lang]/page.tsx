@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation"; // lấy params Next.js
+import { getTranslation } from "./translation";
+
 import StudentTable from "@/components/StudentTable";
 import FilterSection from "@/components/FilterSection";
 import AddStudentButton from "@/components/AddStudentButton";
@@ -76,7 +79,56 @@ interface Class {
   name: string;
 }
 
-export default function Home() {
+// interface HomePageProps {
+//   params: {
+//     lang: string; // Lấy từ route /[lang]
+//   };
+// }
+
+interface Translations {
+  home: {
+    title: string;
+  };
+  // Add other expected translation keys based on your JSON files
+}
+
+export default function Home({ params }: { params: { lang: "en" | "vi" } }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [translations, setTranslations] = useState<Translations | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (params.lang) {
+      setLoading(true);
+      getTranslation(params.lang)
+        .then((t) => {
+          setTranslations(t as Translations); // Cast if confident about the structure
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Failed to load translations:", err);
+          setError("Failed to load translations");
+          setLoading(false);
+        });
+    }
+  }, [params.lang]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!translations) {
+    return <div>No translations loaded.</div>;
+  }
+
   const [students, setStudents] = useState<Student[]>([]);
   const [pagination, setPagination] = useState({
     totalRecords: 0,
@@ -104,13 +156,18 @@ export default function Home() {
         limit: pagination.pageSize.toString(),
         ...(filterParams.fullName && { fullName: filterParams.fullName }),
         ...(filterParams.studentId && { studentId: filterParams.studentId }),
-        ...(filterParams.departmentId && { departmentId: filterParams.departmentId }),
+        ...(filterParams.departmentId && {
+          departmentId: filterParams.departmentId,
+        }),
       }).toString();
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students?${query}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/students?${query}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       if (res.status === 404) {
         setStudents([]);
@@ -157,7 +214,11 @@ export default function Home() {
     fetchClasses();
   }, []);
 
-  const handleSearch = (newFilters: { fullName: string; studentId: string; departmentId: string }) => {
+  const handleSearch = (newFilters: {
+    fullName: string;
+    studentId: string;
+    departmentId: string;
+  }) => {
     setFilters(newFilters);
     fetchStudents(1, newFilters);
   };
@@ -192,7 +253,9 @@ export default function Home() {
 
       const deletedIds = await Promise.all(deletePromises);
 
-      setStudents(students.filter((student) => !deletedIds.includes(student.studentId)));
+      setStudents(
+        students.filter((student) => !deletedIds.includes(student.studentId))
+      );
       setSelectedStudents([]);
       if (students.length === deletedIds.length && pagination.currentPage > 1) {
         fetchStudents(pagination.currentPage - 1, filters);
@@ -225,7 +288,11 @@ export default function Home() {
         }).then(async (res) => {
           if (!res.ok) {
             const error = await res.json();
-            toast.error(`Failed to register student ${studentId}: ${error.message || "Unknown error"}`);
+            toast.error(
+              `Failed to register student ${studentId}: ${
+                error.message || "Unknown error"
+              }`
+            );
           }
           return studentId;
         })
@@ -233,7 +300,9 @@ export default function Home() {
 
       const registeredIds = await Promise.all(registerPromises);
 
-      toast.success(`Đã đăng ký lớp học cho ${registeredIds.length} sinh viên!`);
+      toast.success(
+        `Đã đăng ký lớp học cho ${registeredIds.length} sinh viên!`
+      );
       setSelectedStudents([]);
       setSelectedClassId("");
     } catch (error: any) {
@@ -248,17 +317,26 @@ export default function Home() {
         <NavigationMenuList className="flex justify-between items-center container mx-auto">
           <div className="flex items-center gap-6">
             <NavigationMenuItem>
-              <NavigationMenuLink href="/" className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded">
-                Quản lý Sinh viên
+              <NavigationMenuLink
+                href="/"
+                className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded"
+              >
+                {translations.home.title}
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationMenuLink href="/courses" className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded">
+              <NavigationMenuLink
+                href="/courses"
+                className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded"
+              >
                 Quản lý Khóa học
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationMenuLink href="/classes" className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded">
+              <NavigationMenuLink
+                href="/classes"
+                className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded"
+              >
                 Quản lý Lớp học
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -276,13 +354,19 @@ export default function Home() {
             {selectedStudents.length > 0 && (
               <>
                 <div className="flex items-center gap-2">
-                  <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+                  <Select
+                    value={selectedClassId}
+                    onValueChange={setSelectedClassId}
+                  >
                     <SelectTrigger className="w-[200px]">
                       <SelectValue placeholder="Chọn lớp học" />
                     </SelectTrigger>
                     <SelectContent>
                       {classes.map((classItem) => (
-                        <SelectItem key={classItem.classId} value={classItem.classId}>
+                        <SelectItem
+                          key={classItem.classId}
+                          value={classItem.classId}
+                        >
                           {classItem.name || classItem.classId}
                         </SelectItem>
                       ))}
@@ -298,7 +382,8 @@ export default function Home() {
                       <DialogHeader>
                         <DialogTitle>Xác nhận đăng ký lớp</DialogTitle>
                         <DialogDescription>
-                          Bạn có muốn đăng ký lớp học cho {selectedStudents.length} sinh viên đã chọn?
+                          Bạn có muốn đăng ký lớp học cho{" "}
+                          {selectedStudents.length} sinh viên đã chọn?
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter>
@@ -312,13 +397,16 @@ export default function Home() {
                 </div>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="destructive">Xóa {selectedStudents.length} sinh viên</Button>
+                    <Button variant="destructive">
+                      Xóa {selectedStudents.length} sinh viên
+                    </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Xác nhận xóa</DialogTitle>
                       <DialogDescription>
-                        Bạn có chắc muốn xóa {selectedStudents.length} sinh viên đã chọn? Hành động này không thể hoàn tác.
+                        Bạn có chắc muốn xóa {selectedStudents.length} sinh viên
+                        đã chọn? Hành động này không thể hoàn tác.
                       </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { dir } from "i18next"; 
-import { languages } from "../i18n/setting"; 
-import "./globals.css";
+import { dir } from "i18next";
+import { languages } from "@/i18n/setting";
+import "../globals.css";
 
 import { Toaster } from "@/components/ui/sonner";
 
@@ -22,6 +22,14 @@ export const metadata: Metadata = {
 };
 
 export async function generateStaticParams() {
+  console.log("DEBUG: Languages for generateStaticParams:", languages);
+  if (!languages || languages.length === 0) {
+    console.error(
+      "ERROR: 'languages' is undefined or empty in generateStaticParams. Check import and tsconfig.json paths."
+    );
+    // Fallback for testing, but indicates a problem
+    return [{ lang: "vi" }, { lang: "en" }];
+  }
   return languages.map((lang) => ({ lang }));
 }
 
@@ -30,14 +38,14 @@ export default function RootLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { lang: string }
+  params: { lang: string };
 }) {
   return (
     <html lang={params.lang} dir={dir(params.lang)}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-      <Toaster/>
+        <Toaster />
         {children}
       </body>
     </html>
