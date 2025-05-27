@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import StudentTable from "@/components/StudentTable";
 import FilterSection from "@/components/FilterSection";
@@ -104,13 +105,18 @@ export default function Home() {
         limit: pagination.pageSize.toString(),
         ...(filterParams.fullName && { fullName: filterParams.fullName }),
         ...(filterParams.studentId && { studentId: filterParams.studentId }),
-        ...(filterParams.departmentId && { departmentId: filterParams.departmentId }),
+        ...(filterParams.departmentId && {
+          departmentId: filterParams.departmentId,
+        }),
       }).toString();
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students?${query}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/students?${query}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       if (res.status === 404) {
         setStudents([]);
@@ -157,7 +163,11 @@ export default function Home() {
     fetchClasses();
   }, []);
 
-  const handleSearch = (newFilters: { fullName: string; studentId: string; departmentId: string }) => {
+  const handleSearch = (newFilters: {
+    fullName: string;
+    studentId: string;
+    departmentId: string;
+  }) => {
     setFilters(newFilters);
     fetchStudents(1, newFilters);
   };
@@ -192,7 +202,9 @@ export default function Home() {
 
       const deletedIds = await Promise.all(deletePromises);
 
-      setStudents(students.filter((student) => !deletedIds.includes(student.studentId)));
+      setStudents(
+        students.filter((student) => !deletedIds.includes(student.studentId))
+      );
       setSelectedStudents([]);
       if (students.length === deletedIds.length && pagination.currentPage > 1) {
         fetchStudents(pagination.currentPage - 1, filters);
@@ -225,7 +237,11 @@ export default function Home() {
         }).then(async (res) => {
           if (!res.ok) {
             const error = await res.json();
-            toast.error(`Failed to register student ${studentId}: ${error.message || "Unknown error"}`);
+            toast.error(
+              `Failed to register student ${studentId}: ${
+                error.message || "Unknown error"
+              }`
+            );
           }
           return studentId;
         })
@@ -233,7 +249,9 @@ export default function Home() {
 
       const registeredIds = await Promise.all(registerPromises);
 
-      toast.success(`Đã đăng ký lớp học cho ${registeredIds.length} sinh viên!`);
+      toast.success(
+        `Đã đăng ký lớp học cho ${registeredIds.length} sinh viên!`
+      );
       setSelectedStudents([]);
       setSelectedClassId("");
     } catch (error: any) {
@@ -242,24 +260,35 @@ export default function Home() {
     }
   };
 
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-gray-100">
       <NavigationMenu className="bg-white shadow-md p-4 max-w-full">
         <NavigationMenuList className="flex justify-between items-center container mx-auto">
           <div className="flex items-center gap-6">
             <NavigationMenuItem>
-              <NavigationMenuLink href="/" className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded">
-                Quản lý Sinh viên
+              <NavigationMenuLink
+                href="/"
+                className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded"
+              >
+                {t("common:title1")}
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationMenuLink href="/courses" className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded">
-                Quản lý Khóa học
+              <NavigationMenuLink
+                href="/courses"
+                className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded"
+              >
+                {t("common:title2")}
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationMenuLink href="/classes" className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded">
-                Quản lý Lớp học
+              <NavigationMenuLink
+                href="/classes"
+                className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded"
+              >
+                {t("common:title3")}
               </NavigationMenuLink>
             </NavigationMenuItem>
           </div>
@@ -267,7 +296,7 @@ export default function Home() {
       </NavigationMenu>
 
       <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Danh sách Sinh viên</h1>
+        <h1 className="text-2xl font-bold mb-4">{t("danh_sach_sv")}</h1>
         <div className="flex justify-between mb-4 flex-col">
           <FilterSection onSearch={handleSearch} />
           <div className="flex gap-4 mb-4">
@@ -276,13 +305,19 @@ export default function Home() {
             {selectedStudents.length > 0 && (
               <>
                 <div className="flex items-center gap-2">
-                  <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+                  <Select
+                    value={selectedClassId}
+                    onValueChange={setSelectedClassId}
+                  >
                     <SelectTrigger className="w-[200px]">
                       <SelectValue placeholder="Chọn lớp học" />
                     </SelectTrigger>
                     <SelectContent>
                       {classes.map((classItem) => (
-                        <SelectItem key={classItem.classId} value={classItem.classId}>
+                        <SelectItem
+                          key={classItem.classId}
+                          value={classItem.classId}
+                        >
                           {classItem.name || classItem.classId}
                         </SelectItem>
                       ))}
@@ -291,42 +326,56 @@ export default function Home() {
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button disabled={!selectedClassId}>
-                        Đăng ký lớp ({selectedStudents.length})
+                        {t("dang_ky_lop", {
+                          selectedStudentsLength: selectedStudents.length,
+                        })}
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Xác nhận đăng ký lớp</DialogTitle>
+                        <DialogTitle>{t("xac_nhan_dk")}</DialogTitle>
                         <DialogDescription>
-                          Bạn có muốn đăng ký lớp học cho {selectedStudents.length} sinh viên đã chọn?
+                          {t("xac_nhan_dk2", {
+                            selectedStudentsLength: selectedStudents.length,
+                          })}
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter>
                         <DialogClose asChild>
-                          <Button variant="outline">Hủy</Button>
+                          <Button variant="outline">{t("huy")}</Button>
                         </DialogClose>
-                        <Button onClick={handleRegisterClass}>Đăng ký</Button>
+                        <Button onClick={handleRegisterClass}>
+                          {t("dang_ky")}
+                        </Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
                 </div>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="destructive">Xóa {selectedStudents.length} sinh viên</Button>
+                    <Button variant="destructive">
+                      {t("xoa_sv", {
+                        selectedStudentsLength: selectedStudents.length,
+                      })}
+                    </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Xác nhận xóa</DialogTitle>
+                      <DialogTitle>{t("xac_nhan_xoa")}</DialogTitle>
                       <DialogDescription>
-                        Bạn có chắc muốn xóa {selectedStudents.length} sinh viên đã chọn? Hành động này không thể hoàn tác.
+                        Bạn có chắc muốn xóa {selectedStudents.length} sinh viên
+                        đã chọn? Hành động này không thể hoàn tác.
+                        {t("xac_nhan_xoa2", {
+                          selectedStudentsLength: selectedStudents.length,
+                        })}
                       </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                       <DialogClose asChild>
-                        <Button variant="outline">Hủy</Button>
+                        <Button variant="outline">{t("huy")}</Button>
                       </DialogClose>
                       <Button variant="destructive" onClick={handleDelete}>
-                        Xóa
+                        {t("xoa")}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
