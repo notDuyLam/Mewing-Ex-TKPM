@@ -9,7 +9,7 @@ export default async function StudentPage({
 }: {
   params: { locale: string; studentId: string };
 }) {
-  const { locale, studentId } = params;
+  const { locale, studentId } = await params;
 
   const { t, resources } = await initTranslations(locale, i18nNamespaces);
   return (

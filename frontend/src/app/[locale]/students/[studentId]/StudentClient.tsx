@@ -1049,7 +1049,7 @@ export default function StudentDetailPage({
 
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="destructive">{t("xoa_sinhvien")}</Button>
+              <Button variant="destructive">{t("xoa_sv")}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
