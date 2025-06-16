@@ -68,6 +68,7 @@ Student Management
     ```
     NEXT_PUBLIC_API_URL=
     NEXT_PUBLIC_ALLOWED_PHONE_NUMBERS=[{"code":"VN","name":"Vietnam","regex":"^\\+84\\d{9,10}$"},{"code":"US","name":"United States","regex":"^\\+1\\d{10}$"},{"code":"UK","name":"United Kingdom","regex":"^\\+44\\d{10}$"}]
+    I18NEXUS_API_KEY="OhYWB2J8xKzREdq0adDrSQ"
     ```
 
 - Mặc định frontend chạy <b>PORT 3001</b>, để tùy chỉnh vào file <b>package.json</b>
