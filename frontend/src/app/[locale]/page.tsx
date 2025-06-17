@@ -1,6 +1,7 @@
 import HomeClient from "./HomeClient"; // client-side component
 import initTranslations from "../i18n";
 import TranslationsProvider from "@/components/TranslationProvider";
+import ChangeLangButton from "@/components/ChangeLangButton"
 
 const i18nNamespaces = [
   "home",
@@ -10,6 +11,8 @@ const i18nNamespaces = [
   "manage_options",
   "student",
   "student_table",
+  "export_file",
+  "import_file",
 ];
 
 export default async function HomePage(props: {
@@ -24,6 +27,7 @@ export default async function HomePage(props: {
       locale={locale}
       namespaces={i18nNamespaces}
     >
+        <ChangeLangButton/>
       <HomeClient />
     </TranslationsProvider>
   );
