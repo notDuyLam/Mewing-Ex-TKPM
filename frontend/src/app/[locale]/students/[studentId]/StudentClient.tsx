@@ -312,7 +312,7 @@ export default function StudentDetailPage({
     doc.setFontSize(12);
     doc.text(`${t("mssv")}: ${student.studentId}`, 20, y);
     y += 8;
-    doc.text(`${t("ho_ten")}: ${student.fullName}`, 20, y);
+    doc.text(`${t("hoten")}: ${student.fullName}`, 20, y);
     y += 8;
     doc.text(
       `${t("ngay_sinh")}: ${new Date(student.dateOfBirth).toLocaleDateString(
@@ -1049,13 +1049,13 @@ export default function StudentDetailPage({
 
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="destructive">{t("xoa_sv")}</Button>
+              <Button variant="destructive">{t("xoa_sinhvien")}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{t("xac_nhan_xoa")}</DialogTitle>
                 <DialogDescription>
-                  {t("confirm_delete_student", {
+                  {t("xac_nhan_xoa_sv", {
                     fullName: student.fullName,
                     studentId: student.studentId,
                   })}

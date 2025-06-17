@@ -1,4 +1,22 @@
-{"chinhsua":"Edit Student","chi_tiet_sv":"Student Details: {{studentFullName}}","chuong_trinh":"Programme:","diachinhanthu":"Mailing address:","diachitamtru":"Temporary address:","diachithuongtru":"Permanent address:","ganchip":"Chip mounting:","ghichu":"Note:","gioi_tinh":"Sex:","ho_ten":"Full name:","khoa":"Department:","khoas":"Lock:","khongcothongtin":"No details available","khongcothongtin2":"No paperwork","loaigiayto":"Document type:","mssv":"Student ID:","ngaycap":"Date of issue:","ngayhethan":"Expiration date:","ngay_sinh":"Date of birth:","noicap":"Place of issue:","quocgiacap":"Country of issue:","quoctich":"Nationality:","sdt":"Phone number:","sogiayto":"Document number:","thong_tin_bo_sung":"Additional information","thong_tin_co_ban":"Basic information","trang_thai":"Status:","trove":"Return",
-    "xoa_sv": "Delete Student",
-    "xem_ket_qua_hoc_tap": "Show academic results"
-}
+{"chinhsua":"Edit Student","chi_tiet_sv":"Student Details: {{studentFullName}}","chuong_trinh":"Programme:","diachinhanthu":"Mailing address:","diachitamtru":"Temporary address:","diachithuongtru":"Permanent address:","ganchip":"Chip mounting:","ghichu":"Note:","gioi_tinh":"Sex:","ho_ten":"Full name:","khoa":"Department:","khoas":"Lock:","khongcothongtin":"No details available","khongcothongtin2":"No paperwork","loaigiayto":"Document type:","mssv":"Student ID:","ngaycap":"Date of issue:","ngayhethan":"Expiration date:","ngay_sinh":"Date of birth:","noicap":"Place of issue:","quocgiacap":"Country of issue:","quoctich":"Nationality:","sdt":"Phone number:","sogiayto":"Document number:","thong_tin_bo_sung":"Additional information","thong_tin_co_ban":"Basic information","trang_thai":"Status:","trove":"Return","dang_luu": "Saving...",
+  "luu": "Save",
+  "xoa_sinhvien": "Delete student",
+  "xac_nhan_xoa": "Confirm deletion",
+  "xac_nhan_xoa_sv": "Are you sure you want to delete student {{fullName}} ({{studentId}})? This action cannot be undone.",
+  "huy": "Cancel",
+  "xoa": "Delete",
+  "xem_ket_qua_hoc_tap": "View academic results",
+  "ket_qua_hoc_tap_cua": "Academic results of {{fullName}}",
+  "dang_tai": "Loading...",
+  "khong_co_ket_qua_hoc_tap": "No academic results",
+  "ma_lop": "Class ID",
+  "ten_mon_hoc": "Course name",
+  "so_tin_chi": "Credits",
+  "diem": "Grade",
+  "ky_hoc": "Semester",
+  "dang_hoc": "In progress",
+  "da_hoan_thanh": "Completed",
+  "chua_hoan_thanh": "Not completed",
+  "in_ban_diem": "Print transcript",
+  "dong": "Close"}
+  
