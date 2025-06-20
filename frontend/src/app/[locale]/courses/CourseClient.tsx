@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -59,6 +60,7 @@ interface ApiResponse {
 }
 
 export default function Courses() {
+  const { t } = useTranslation();
   const [courses, setCourses] = useState<Course[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [createFormData, setCreateFormData] = useState({
@@ -174,7 +176,7 @@ export default function Courses() {
       }
 
       fetchCourses();
-      toast.success("Khóa học đã được tạo thành công!");
+      toast.success(t("courses:khoa_hoc_tao_thanh_cong"));
       setCreateFormData({
         courseId: "",
         courseName: "",
@@ -185,7 +187,7 @@ export default function Courses() {
       });
     } catch (error) {
       console.error("Error creating course:", error);
-      toast.error("Không thể tạo khóa học!");
+      toast.error(t("courses:khong_the_tao_khoa_hoc"));
     }
   };
 
@@ -210,7 +212,7 @@ export default function Courses() {
       }
 
       fetchCourses();
-      toast.success("Khóa học đã được cập nhật thành công!");
+      toast.success(t("courses:khoa_hoc_cap_nhat_thanh_cong"));
       setEditFormData({
         courseId: "",
         courseName: "",
@@ -223,7 +225,7 @@ export default function Courses() {
       setSelectedCourseId(null);
     } catch (error) {
       console.error("Error updating course:", error);
-      toast.error("Không thể cập nhật khóa học!");
+      toast.error(t("courses:khong_the_cap_nhat_khoa_hoc"));
     }
   };
 
@@ -245,14 +247,14 @@ export default function Courses() {
       const hasClasses = await checkCourseClasses(courseId);
       setDeleteDialogMessage(
         hasClasses
-          ? "Đã có lớp mở từ khóa học, bạn có muốn đóng mở lớp cho khóa này không?"
-          : "Bạn có muốn xóa khóa học này không?"
+          ? t("courses:co_lop_mo")
+          : t("courses:ban_co_muon_xoa")
       );
       setSelectedCourseId(courseId);
       setIsDeleteDialogOpen(true);
     } catch (error) {
       console.error("Error checking course classes:", error);
-      toast.error("Không thể kiểm tra lớp học!");
+      toast.error(t("courses:khong_the_kiem_tra_lop_hoc"));
     }
   };
 
@@ -271,12 +273,12 @@ export default function Courses() {
       }
 
       fetchCourses();
-      toast.success("Khóa học đã được xóa thành công!");
+      toast.success(t("courses:khoa_hoc_xoa_thanh_cong"));
       setIsDeleteDialogOpen(false);
       setSelectedCourseId(null);
     } catch (error) {
       console.error("Error deleting course:", error);
-      toast.error("Không thể xóa khóa học!");
+      toast.error(t("courses:khong_the_xoa_khoa_hoc"));
     }
   };
 
@@ -300,12 +302,12 @@ export default function Courses() {
       }
 
       fetchCourses();
-      toast.success("Khóa học đã được kích hoạt thành công!");
+      toast.success(t("courses:khoa_hoc_kich_hoat_thanh_cong"));
       setIsActivateDialogOpen(false);
       setSelectedCourseId(null);
     } catch (error) {
       console.error("Error activating course:", error);
-      toast.error("Không thể kích hoạt khóa học!");
+      toast.error(t("courses:khong_the_kich_hoat_khoa_hoc"));
     }
   };
 
@@ -316,17 +318,17 @@ export default function Courses() {
           <div className="flex items-center gap-6">
             <NavigationMenuItem>
               <NavigationMenuLink href="/" className="text-lg font-semibold text-gray-100 bg-gray-800">
-                Quản lý Sinh viên
+                {t("courses:quan_ly_sinh_vien")}
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuLink href="/courses" className="text-lg font-semibold text-gray-100 bg-gray-800">
-                Quản lý Khóa học
+                {t("courses:quan_ly_khoa_hoc")}
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuLink href="/classes" className="text-lg font-semibold text-gray-100 bg-gray-800">
-                Quản lý Lớp học
+                {t("courses:quan_ly_lop_hoc")}
               </NavigationMenuLink>
             </NavigationMenuItem>
           </div>
@@ -334,23 +336,23 @@ export default function Courses() {
       </NavigationMenu>
 
       <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Danh sách Khóa học</h1>
+        <h1 className="text-2xl font-bold mb-4">{t("courses:danh_sach_khoa_hoc")}</h1>
         <div className="flex justify-between mb-4">
           <Dialog>
             <DialogTrigger asChild>
-              <Button>Thêm Khóa học</Button>
+              <Button>{t("courses:them_khoa_hoc")}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Thêm Khóa học</DialogTitle>
+                <DialogTitle>{t("courses:them_khoa_hoc")}</DialogTitle>
                 <DialogDescription>
-                  Điền thông tin khóa học bên dưới. Nhấn Lưu khi hoàn tất.
+                  {t("courses:dien_thong_tin_khoa_hoc")}
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <label htmlFor="courseId" className="text-right">
-                    Mã Khóa học
+                    {t("courses:ma_khoa_hoc")}
                   </label>
                   <Input
                     id="courseId"
@@ -361,7 +363,7 @@ export default function Courses() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <label htmlFor="courseName" className="text-right">
-                    Tên Khóa học
+                    {t("courses:ten_khoa_hoc")}
                   </label>
                   <Input
                     id="courseName"
@@ -372,7 +374,7 @@ export default function Courses() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <label htmlFor="credits" className="text-right">
-                    Số tín chỉ
+                    {t("courses:so_tin_chi")}
                   </label>
                   <Input
                     id="credits"
@@ -384,14 +386,14 @@ export default function Courses() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <label htmlFor="departmentId" className="text-right">
-                    Khoa
+                    {t("courses:khoa")}
                   </label>
                   <Select
                     value={createFormData.departmentId}
                     onValueChange={(value) => setCreateFormData({ ...createFormData, departmentId: value })}
                   >
                     <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Chọn khoa" />
+                      <SelectValue placeholder={t("courses:chon_khoa")} />
                     </SelectTrigger>
                     <SelectContent>
                       {departments.length > 0 ? (
@@ -402,7 +404,7 @@ export default function Courses() {
                         ))
                       ) : (
                         <SelectItem value="0" disabled>
-                          Không có khoa nào
+                          {t("courses:khong_co_khoa")}
                         </SelectItem>
                       )}
                     </SelectContent>
@@ -410,19 +412,19 @@ export default function Courses() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <label htmlFor="preCourseId" className="text-right">
-                    Khóa học tiên quyết
+                    {t("courses:khoa_hoc_tien_quyet")}
                   </label>
                   <Input
                     id="preCourseId"
                     value={createFormData.preCourseId}
                     onChange={(e) => setCreateFormData({ ...createFormData, preCourseId: e.target.value })}
                     className="col-span-3"
-                    placeholder="Để trống nếu không có"
+                    placeholder={t("courses:de_trong_neu_khong_co")}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <label htmlFor="description" className="text-right">
-                    Mô tả
+                    {t("courses:mo_ta")}
                   </label>
                   <Textarea
                     id="description"
@@ -434,194 +436,212 @@ export default function Courses() {
               </div>
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button variant="outline">Hủy</Button>
+                  <Button variant="outline">{t("courses:huy")}</Button>
                 </DialogClose>
-                <Button onClick={handleCreate}>Lưu</Button>
+                <Button onClick={handleCreate}>{t("courses:luu")}</Button>
               </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+              </DialogContent>
+            </Dialog>
+          </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Mã Khóa học</TableHead>
-              <TableHead>Tên Khóa học</TableHead>
-              <TableHead>Số tín chỉ</TableHead>
-              <TableHead>Khoa</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Hành động</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {courses.length > 0 ? (
-              courses.map((course) => (
-                <TableRow key={course.courseId}>
-                  <TableCell>{course.courseId}</TableCell>
-                  <TableCell>{course.courseName}</TableCell>
-                  <TableCell>{course.credits}</TableCell>
-                  <TableCell>{course.Department?.name || "N/A"}</TableCell>
-                  <TableCell>{course.status === "activate" ? "Đang hoạt động" : "Không còn được mở"}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" onClick={() => handleEdit(course)}>
-                            Sửa
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Cập nhật Khóa học</DialogTitle>
-                            <DialogDescription>
-                              Cập nhật thông tin khóa học bên dưới. Nhấn Lưu khi hoàn tất.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <label htmlFor="editCourseName" className="text-right">
-                                Tên Khóa học
-                              </label>
-                              <Input
-                                id="editCourseName"
-                                value={editFormData.courseName}
-                                onChange={(e) => setEditFormData({ ...editFormData, courseName: e.target.value })}
-                                className="col-span-3"
-                              />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <label htmlFor="editCredits" className="text-right">
-                                Số tín chỉ
-                              </label>
-                              <Input
-                                id="editCredits"
-                                type="number"
-                                value={editFormData.credits}
-                                onChange={(e) => setEditFormData({ ...editFormData, credits: Number(e.target.value) })}
-                                className="col-span-3"
-                              />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <label htmlFor="editDepartmentId" className="text-right">
-                                Khoa
-                              </label>
-                              <Select
-                                value={editFormData.departmentId}
-                                onValueChange={(value) => setEditFormData({ ...editFormData, departmentId: value })}
-                              >
-                                <SelectTrigger className="col-span-3">
-                                  <SelectValue placeholder="Chọn khoa" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {departments.length > 0 ? (
-                                    departments.map((dept) => (
-                                      <SelectItem key={dept.id} value={dept.id.toString()}>
-                                        {dept.name}
-                                      </SelectItem>
-                                    ))
-                                  ) : (
-                                    <SelectItem value="0" disabled>
-                                      Không có khoa nào
-                                    </SelectItem>
-                                  )}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <label htmlFor="editPreCourseId" className="text-right">
-                                Khóa học tiên quyết
-                              </label>
-                              <Input
-                                id="editPreCourseId"
-                                value={editFormData.preCourseId}
-                                onChange={(e) => setEditFormData({ ...editFormData, preCourseId: e.target.value })}
-                                className="col-span-3"
-                                placeholder="Để trống nếu không có"
-                              />
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <label htmlFor="editDescription" className="text-right">
-                                Mô tả
-                              </label>
-                              <Textarea
-                                id="editDescription"
-                                value={editFormData.description}
-                                onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-                                className="col-span-3"
-                              />
-                            </div>
-                          </div>
-                          <DialogFooter>
-                            <DialogClose asChild>
-                              <Button variant="outline">Hủy</Button>
-                            </DialogClose>
-                            <Button onClick={handleUpdate}>Lưu</Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                      {course.status !== "deactivate" && (
-                        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("courses:ma_khoa_hoc")}</TableHead>
+                <TableHead>{t("courses:ten_khoa_hoc")}</TableHead>
+                <TableHead>{t("courses:so_tin_chi")}</TableHead>
+                <TableHead>{t("courses:khoa")}</TableHead>
+                <TableHead>{t("courses:trang_thai")}</TableHead>
+                <TableHead>{t("courses:hanh_dong")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {courses.length > 0 ? (
+                courses.map((course) => (
+                  <TableRow key={course.courseId}>
+                    <TableCell>{course.courseId}</TableCell>
+                    <TableCell>{course.courseName}</TableCell>
+                    <TableCell>{course.credits}</TableCell>
+                    <TableCell>{course.Department?.name || "N/A"}</TableCell>
+                    <TableCell>
+                      {course.status === "activate"
+                        ? t("courses:dang_hoat_dong")
+                        : t("courses:khong_con_duoc_mo")}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                           <DialogTrigger asChild>
-                            <Button
-                              variant="destructive"
-                              onClick={() => handleDeleteConfirm(course.courseId)}
-                            >
-                              Xóa
+                            <Button variant="outline" onClick={() => handleEdit(course)}>
+                              {t("courses:sua")}
                             </Button>
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
-                              <DialogTitle>Xác nhận xóa</DialogTitle>
-                              <DialogDescription>{deleteDialogMessage}</DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter>
-                              <DialogClose asChild>
-                                <Button variant="outline">Hủy</Button>
-                              </DialogClose>
-                              <Button variant="destructive" onClick={handleDelete}>
-                                Có
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-                      )}
-                      {course.status !== "active" && (
-                        <Dialog open={isActivateDialogOpen} onOpenChange={setIsActivateDialogOpen}>
-                          <DialogTrigger asChild>
-                            <Button onClick={() => handleActivateConfirm(course.courseId)}>
-                              Kích hoạt
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Xác nhận kích hoạt</DialogTitle>
+                              <DialogTitle>{t("courses:cap_nhat_khoa_hoc")}</DialogTitle>
                               <DialogDescription>
-                                Bạn có muốn kích hoạt lại môn học này?
+                                {t("courses:cap_nhat_thong_tin_khoa_hoc")}
                               </DialogDescription>
                             </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor="editCourseName" className="text-right">
+                                  {t("courses:ten_khoa_hoc")}
+                                </label>
+                                <Input
+                                  id="editCourseName"
+                                  value={editFormData.courseName}
+                                  onChange={(e) =>
+                                    setEditFormData({ ...editFormData, courseName: e.target.value })
+                                  }
+                                  className="col-span-3"
+                                />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor="editCredits" className="text-right">
+                                  {t("courses:so_tin_chi")}
+                                </label>
+                                <Input
+                                  id="editCredits"
+                                  type="number"
+                                  value={editFormData.credits}
+                                  onChange={(e) =>
+                                    setEditFormData({
+                                      ...editFormData,
+                                      credits: Number(e.target.value),
+                                    })
+                                  }
+                                  className="col-span-3"
+                                />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor="editDepartmentId" className="text-right">
+                                  {t("courses:khoa")}
+                                </label>
+                                <Select
+                                  value={editFormData.departmentId}
+                                  onValueChange={(value) =>
+                                    setEditFormData({ ...editFormData, departmentId: value })
+                                  }
+                                >
+                                  <SelectTrigger className="col-span-3">
+                                    <SelectValue placeholder={t("courses:chon_khoa")} />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {departments.length > 0 ? (
+                                      departments.map((dept) => (
+                                        <SelectItem key={dept.id} value={dept.id.toString()}>
+                                          {dept.name}
+                                        </SelectItem>
+                                      ))
+                                    ) : (
+                                      <SelectItem value="0" disabled>
+                                        {t("courses:khong_co_khoa")}
+                                      </SelectItem>
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor="editPreCourseId" className="text-right">
+                                  {t("courses:khoa_hoc_tien_quyet")}
+                                </label>
+                                <Input
+                                  id="editPreCourseId"
+                                  value={editFormData.preCourseId}
+                                  onChange={(e) =>
+                                    setEditFormData({ ...editFormData, preCourseId: e.target.value })
+                                  }
+                                  className="col-span-3"
+                                  placeholder={t("courses:de_trong_neu_khong_co")}
+                                />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor="editDescription" className="text-right">
+                                  {t("courses:mo_ta")}
+                                </label>
+                                <Textarea
+                                  id="editDescription"
+                                  value={editFormData.description}
+                                  onChange={(e) =>
+                                    setEditFormData({ ...editFormData, description: e.target.value })
+                                  }
+                                  className="col-span-3"
+                                />
+                              </div>
+                            </div>
                             <DialogFooter>
                               <DialogClose asChild>
-                                <Button variant="outline">Hủy</Button>
+                                <Button variant="outline">{t("courses:huy")}</Button>
                               </DialogClose>
-                              <Button onClick={handleActivate}>Có</Button>
+                              <Button onClick={handleUpdate}>{t("courses:luu")}</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
-                      )}
-                    </div>
+                        {course.status !== "deactivate" && (
+                          <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="destructive"
+                                onClick={() => handleDeleteConfirm(course.courseId)}
+                              >
+                                {t("courses:xoa")}
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>{t("courses:xoa_khoa_hoc")}</DialogTitle>
+                                <DialogDescription>{deleteDialogMessage}</DialogDescription>
+                              </DialogHeader>
+                              <DialogFooter>
+                                <DialogClose asChild>
+                                  <Button variant="outline">{t("courses:huy")}</Button>
+                                </DialogClose>
+                                <Button variant="destructive" onClick={handleDelete}>
+                                  {t("courses:co")}
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        )}
+                        {course.status !== "active" && (
+                          <Dialog open={isActivateDialogOpen} onOpenChange={setIsActivateDialogOpen}>
+                            <DialogTrigger asChild>
+                              <Button onClick={() => handleActivateConfirm(course.courseId)}>
+                                {t("courses:kich_hoat")}
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>{t("courses:kich_hoat_khoa_hoc")}</DialogTitle>
+                                <DialogDescription>
+                                  {t("courses:ban_co_muon_kich_hoat")}
+                                </DialogDescription>
+                              </DialogHeader>
+                              <DialogFooter>
+                                <DialogClose asChild>
+                                  <Button variant="outline">{t("courses:huy")}</Button>
+                                </DialogClose>
+                                <Button onClick={handleActivate}>{t("courses:co")}</Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center">
+                    {t("courses:khong_co_khoa_hoc")}
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">
-                  Không có khóa học nào
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      );
     </div>
-  );
-}
+  )
+};

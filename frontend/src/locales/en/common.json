@@ -1,0 +1,9 @@
+{
+    "title1":"Student Management",
+    "title2":"Course Management",
+    "title3":"Classroom Management",
+    "languages": {
+        "en": "English",
+        "vi": "Vietnamese"
+    }
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -15,13 +16,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 
 // Import font Roboto-Regular dưới dạng base64
 // Giả sử bạn đã lưu chuỗi base64 trong file `@/fonts/Roboto-Regular.js`
-import {robotoFont} from "@/fonts/Roboto-Regular";
+import { robotoFont } from "@/fonts/Roboto-Regular";
 
 // Nếu bạn chưa có file Roboto-Regular.js, bạn cần tạo file này với nội dung:
 // export default "data:font/truetype;base64,AEAAA..."; (chuỗi base64 của font Roboto-Regular.ttf)
@@ -125,10 +133,11 @@ interface Student {
 }
 
 export default function StudentDetailPage({
-  params,
+  studentId,
 }: {
-  params: Promise<{ studentId: string }>;
+  studentId: string;
 }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
@@ -137,7 +146,9 @@ export default function StudentDetailPage({
   const [grades, setGrades] = useState<Grade[]>([]);
   const [editStudent, setEditStudent] = useState<Student | null>(null);
   const [editDetails, setEditDetails] = useState<StudentDetails | null>(null);
-  const [editIdentity, setEditIdentity] = useState<IdentityDocuments | null>(null);
+  const [editIdentity, setEditIdentity] = useState<IdentityDocuments | null>(
+    null
+  );
   const [departments, setDepartments] = useState<Department[]>([]);
   const [statuses, setStatuses] = useState<Status[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -146,24 +157,49 @@ export default function StudentDetailPage({
 
   const fetchStudent = async (studentId: string) => {
     try {
-      const studentRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/${studentId}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      const studentRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/students/${studentId}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       if (!studentRes.ok) throw new Error("Failed to fetch student");
       const studentData: Student = await studentRes.json();
 
-      const [deptRes, statusRes, progRes, detailsRes, identityRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/departments/${studentData.departmentId}`, { method: "GET" }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/statuses/${studentData.statusId}`, { method: "GET" }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/${studentData.programId}`, { method: "GET" }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-details/${studentId}`, { method: "GET" }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/identity-documents/student/${studentId}`, { method: "GET" }),
-      ]);
+      const [deptRes, statusRes, progRes, detailsRes, identityRes] =
+        await Promise.all([
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/departments/${studentData.departmentId}`,
+            { method: "GET" }
+          ),
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/statuses/${studentData.statusId}`,
+            { method: "GET" }
+          ),
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/programs/${studentData.programId}`,
+            { method: "GET" }
+          ),
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/student-details/${studentId}`,
+            { method: "GET" }
+          ),
+          fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/identity-documents/student/${studentId}`,
+            { method: "GET" }
+          ),
+        ]);
 
-      const department = deptRes.ok ? await deptRes.json() : { id: studentData.departmentId, name: "N/A" };
-      const status = statusRes.ok ? await statusRes.json() : { id: studentData.statusId, name: "N/A" };
-      const program = progRes.ok ? await progRes.json() : { id: studentData.programId, name: "N/A" };
+      const department = deptRes.ok
+        ? await deptRes.json()
+        : { id: studentData.departmentId, name: "N/A" };
+      const status = statusRes.ok
+        ? await statusRes.json()
+        : { id: studentData.statusId, name: "N/A" };
+      const program = progRes.ok
+        ? await progRes.json()
+        : { id: studentData.programId, name: "N/A" };
       const details = detailsRes.ok ? await detailsRes.json() : null;
       const identity = identityRes.ok ? await identityRes.json() : null;
 
@@ -173,29 +209,40 @@ export default function StudentDetailPage({
         identity.expiryDate = identity.expiryDate.split("T")[0];
       }
 
-      const fullStudent = { ...studentData, department, status, program, details, identity };
+      const fullStudent = {
+        ...studentData,
+        department,
+        status,
+        program,
+        details,
+        identity,
+      };
       setStudent(fullStudent);
       setEditStudent(fullStudent);
-      setEditDetails(details || {
-        permanentAddressHouse: "",
-        permanentAddressWard: "",
-        permanentAddressDistrict: "",
-        permanentAddressCity: "",
-        permanentAddressCountry: "",
-        temporaryAddress: "",
-        mailingAddress: "",
-        nationality: "",
-      });
-      setEditIdentity(identity || {
-        identityType: "",
-        identityNumber: "",
-        issueDate: "",
-        issuePlace: "",
-        expiryDate: "",
-        chipAttached: false,
-        issuingCountry: "",
-        note: "",
-      });
+      setEditDetails(
+        details || {
+          permanentAddressHouse: "",
+          permanentAddressWard: "",
+          permanentAddressDistrict: "",
+          permanentAddressCity: "",
+          permanentAddressCountry: "",
+          temporaryAddress: "",
+          mailingAddress: "",
+          nationality: "",
+        }
+      );
+      setEditIdentity(
+        identity || {
+          identityType: "",
+          identityNumber: "",
+          issueDate: "",
+          issuePlace: "",
+          expiryDate: "",
+          chipAttached: false,
+          issuingCountry: "",
+          note: "",
+        }
+      );
     } catch (error) {
       console.error("Error fetching student details:", error);
       setStudent(null);
@@ -207,9 +254,15 @@ export default function StudentDetailPage({
   const fetchOptions = async () => {
     try {
       const [deptRes, statusRes, progRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/departments/`, { method: "GET" }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/statuses/`, { method: "GET" }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/`, { method: "GET" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/departments/`, {
+          method: "GET",
+        }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/statuses/`, {
+          method: "GET",
+        }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/`, {
+          method: "GET",
+        }),
       ]);
       setDepartments(deptRes.ok ? await deptRes.json() : []);
       setStatuses(statusRes.ok ? await statusRes.json() : []);
@@ -222,16 +275,19 @@ export default function StudentDetailPage({
   const fetchGrades = async (studentId: string) => {
     setIsGradesLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/report/id/${studentId}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/students/report/id/${studentId}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       if (!response.ok) throw new Error("Failed to fetch grades");
       const data = await response.json();
       setGrades(data.grades);
     } catch (error) {
       console.error("Error fetching grades:", error);
-      toast.error("Không thể tải kết quả học tập");
+      toast.error(t("lay_diem_that_bai"));
     } finally {
       setIsGradesLoading(false);
     }
@@ -242,7 +298,6 @@ export default function StudentDetailPage({
 
     const doc = new jsPDF();
 
-    // Thêm font Roboto để hỗ trợ tiếng Việt
     doc.addFileToVFS("Roboto-Regular.ttf", robotoFont);
     doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
     doc.setFont("Roboto");
@@ -250,38 +305,48 @@ export default function StudentDetailPage({
     const pageWidth = doc.internal.pageSize.getWidth();
     let y = 20;
 
-    // Title
     doc.setFontSize(16);
-    doc.text("BẢNG ĐIỂM SINH VIÊN", pageWidth / 2, y, { align: "center" });
+    doc.text(t("bang_diem"), pageWidth / 2, y, { align: "center" });
     y += 10;
 
-    // Student Info
     doc.setFontSize(12);
-    doc.text(`MSSV: ${student.studentId}`, 20, y);
+    doc.text(`${t("mssv")}: ${student.studentId}`, 20, y);
     y += 8;
-    doc.text(`Họ tên: ${student.fullName}`, 20, y);
+    doc.text(`${t("hoten")}: ${student.fullName}`, 20, y);
     y += 8;
-    doc.text(`Ngày sinh: ${new Date(student.dateOfBirth).toLocaleDateString("vi-VN")}`, 20, y);
+    doc.text(
+      `${t("ngay_sinh")}: ${new Date(student.dateOfBirth).toLocaleDateString(
+        "vi-VN"
+      )}`,
+      20,
+      y
+    );
     y += 8;
-    doc.text(`Khoa: ${student.department?.name || "N/A"}`, 20, y);
+    doc.text(`${t("khoa")}: ${student.department?.name || "N/A"}`, 20, y);
     y += 8;
-    doc.text(`Khóa: ${student.course || "N/A"}`, 20, y);
+    doc.text(`${t("khoa_hoc")}: ${student.course || "N/A"}`, 20, y);
     y += 15;
 
-    // Completed Courses
-    const completedCourses = grades.filter((grade) => grade.status === "passed" && grade.grade !== null);
+    const completedCourses = grades.filter(
+      (grade) => grade.status === "passed" && grade.grade !== null
+    );
 
     doc.setFontSize(14);
-    doc.text("Các môn học đã hoàn thành", 20, y);
+    doc.text(t("mon_hoc_hoan_thanh"), 20, y);
     y += 10;
 
     if (completedCourses.length === 0) {
       doc.setFontSize(12);
-      doc.text("Sinh viên chưa hoàn thành khóa học nào", 20, y);
+      doc.text(t("chua_hoan_thanh_mon_nao"), 20, y);
     } else {
-      // Table Header
       doc.setFontSize(10);
-      const headers = ["Mã lớp", "Tên môn học", "Tín chỉ", "Điểm", "Kỳ học"];
+      const headers = [
+        t("ma_lop"),
+        t("ten_mon_hoc"),
+        t("tin_chi"),
+        t("diem"),
+        t("ky_hoc"),
+      ];
       const colWidths = [30, 60, 20, 20, 50];
       let x = 20;
 
@@ -293,7 +358,6 @@ export default function StudentDetailPage({
       doc.line(20, y, pageWidth - 20, y);
       y += 5;
 
-      // Table Rows
       completedCourses.forEach((grade) => {
         x = 20;
         const row = [
@@ -301,9 +365,11 @@ export default function StudentDetailPage({
           grade.Class.Course.courseName,
           grade.Class.Course.credits.toString(),
           grade.grade!.toFixed(1),
-          `${new Date(grade.Class.Semester.startDate).toLocaleDateString("vi-VN")} - ${new Date(
-            grade.Class.Semester.endDate
-          ).toLocaleDateString("vi-VN")}`,
+          `${new Date(grade.Class.Semester.startDate).toLocaleDateString(
+            "vi-VN"
+          )} - ${new Date(grade.Class.Semester.endDate).toLocaleDateString(
+            "vi-VN"
+          )}`,
         ];
 
         row.forEach((cell, i) => {
@@ -314,28 +380,29 @@ export default function StudentDetailPage({
       });
     }
 
-    // Save PDF
     doc.save(`transcript_${student.studentId}.pdf`);
   };
 
   useEffect(() => {
-    const loadParams = async () => {
-      const { studentId } = await params;
+    const loadData = async () => {
       await fetchStudent(studentId);
       await fetchOptions();
     };
-    loadParams();
-  }, [params]);
+    loadData();
+  }, [studentId]);
 
   const handleSave = async () => {
     if (!editStudent) return;
     setIsSaving(true);
     try {
-      const studentRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/${editStudent.studentId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editStudent),
-      });
+      const studentRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/students/${editStudent.studentId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editStudent),
+        }
+      );
       if (studentRes.status === 400) {
         const data = await studentRes.json();
         toast.info(data.message);
@@ -343,18 +410,30 @@ export default function StudentDetailPage({
       }
 
       if (student?.details) {
-        const detailsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-details/${editStudent.studentId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...editDetails, studentId: editStudent.studentId }),
-        });
+        const detailsRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/student-details/${editStudent.studentId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...editDetails,
+              studentId: editStudent.studentId,
+            }),
+          }
+        );
         if (!detailsRes.ok) throw new Error("Failed to update student details");
       } else if (Object.values(editDetails!).some((val) => val)) {
-        const detailsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-details`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...editDetails, studentId: editStudent.studentId }),
-        });
+        const detailsRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/student-details`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...editDetails,
+              studentId: editStudent.studentId,
+            }),
+          }
+        );
         if (!detailsRes.ok) throw new Error("Failed to create student details");
       }
 
@@ -365,7 +444,10 @@ export default function StudentDetailPage({
             {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ ...editIdentity, studentId: editStudent.studentId }),
+              body: JSON.stringify({
+                ...editIdentity,
+                studentId: editStudent.studentId,
+              }),
             }
           );
           if (!identityRes.ok) {
@@ -375,20 +457,27 @@ export default function StudentDetailPage({
           }
         }
       } else if (editIdentity?.identityType) {
-        const identityRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/identity-documents`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...editIdentity, studentId: editStudent.studentId }),
-        });
-        if (!identityRes.ok) throw new Error("Failed to create identity documents");
+        const identityRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/identity-documents`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...editIdentity,
+              studentId: editStudent.studentId,
+            }),
+          }
+        );
+        if (!identityRes.ok)
+          throw new Error("Failed to create identity documents");
       }
 
-      toast.success("Cập nhật thành công!");
+      toast.success(t("cap_nhat_thanh_cong"));
       setIsEditOpen(false);
       fetchStudent(editStudent.studentId);
     } catch (error) {
       console.error("Error updating student:", error);
-      toast.error("Cập nhật thất bại!");
+      toast.error(t("cap_nhat_that_bai"));
     } finally {
       setIsSaving(false);
     }
@@ -397,18 +486,21 @@ export default function StudentDetailPage({
   const handleDelete = async () => {
     if (!student) return;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students/${student.studentId}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/students/${student.studentId}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       if (!res.ok) throw new Error("Failed to delete student");
 
-      toast.success("Xóa sinh viên thành công!");
+      toast.success(t("xoa_sinh_vien_thanh_cong"));
       router.push("/");
     } catch (error) {
       console.error("Error deleting student:", error);
-      toast.error("Xóa thất bại!");
+      toast.error(t("xoa_sinh_vien_that_bai"));
     }
   };
 
@@ -419,59 +511,72 @@ export default function StudentDetailPage({
 
   const handleGradesOpen = async () => {
     setIsGradesOpen(true);
-    const { studentId } = await params;
     await fetchGrades(studentId);
   };
 
-  if (loading) return <div className="container mx-auto p-4">Đang tải...</div>;
-  if (!student) return <div className="container mx-auto p-4">Không tìm thấy sinh viên</div>;
+  if (loading)
+    return <div className="container mx-auto p-4">{t("dang_tai")}</div>;
+  if (!student)
+    return (
+      <div className="container mx-auto p-4">
+        {t("khong_tim_thay_sinh_vien")}
+      </div>
+    );
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6 text-center">Chi tiết Sinh viên: {student.fullName}</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        {t("chi_tiet_sv", { studentFullName: student.fullName })}
+      </h1>
       <div className="grid grid-cols-2 gap-6 bg-white shadow-md rounded-lg p-6">
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold border-b pb-2">Thông tin cơ bản</h2>
+          <h2 className="text-xl font-semibold border-b pb-2">
+            {t("thong_tin_co_ban")}
+          </h2>
           <div className="space-y-2">
             <p>
-              <strong>MSSV:</strong> {student.studentId}
+              <strong>{t("mssv")}</strong> {student.studentId}
             </p>
             <p>
-              <strong>Họ tên:</strong> {student.fullName}
+              <strong>{t("ho_ten")}</strong> {student.fullName}
             </p>
             <p>
-              <strong>Ngày sinh:</strong> {new Date(student.dateOfBirth).toLocaleDateString("vi-VN")}
+              <strong>{t("ngay_sinh")}</strong>{" "}
+              {new Date(student.dateOfBirth).toLocaleDateString("vi-VN")}
             </p>
             <p>
-              <strong>Giới tính:</strong> {student.gender}
+              <strong>{t("gioi_tinh")}</strong> {student.gender}
             </p>
             <p>
-              <strong>Email:</strong> {student.email}
+              <strong>{t("Email")}</strong> {student.email}
             </p>
             <p>
-              <strong>Số điện thoại:</strong> {student.phoneNumber}
+              <strong>{t("sdt")}</strong> {student.phoneNumber}
             </p>
             <p>
-              <strong>Khoa:</strong> {student.department?.name || "N/A"}
+              <strong>{t("khoa")}</strong> {student.department?.name || "N/A"}
             </p>
             <p>
-              <strong>Khóa:</strong> {student.course || "N/A"}
+              <strong>{t("khoas")}</strong> {student.course || "N/A"}
             </p>
             <p>
-              <strong>Trạng thái:</strong> {student.status?.name || "N/A"}
+              <strong>{t("trang_thai")}</strong> {student.status?.name || "N/A"}
             </p>
             <p>
-              <strong>Chương trình:</strong> {student.program?.name || "N/A"}
+              <strong>{t("chuong_trinh")}</strong>{" "}
+              {student.program?.name || "N/A"}
             </p>
           </div>
         </div>
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold border-b pb-2">Thông tin bổ sung</h2>
+          <h2 className="text-xl font-semibold border-b pb-2">
+            {t("thong_tin_bo_sung")}
+          </h2>
           <div className="space-y-2">
             {student.details ? (
               <>
                 <p>
-                  <strong>Địa chỉ thường trú:</strong>{" "}
+                  <strong>{t("diachithuongtru")}</strong>{" "}
                   {[
                     student.details.permanentAddressHouse,
                     student.details.permanentAddressWard,
@@ -483,132 +588,183 @@ export default function StudentDetailPage({
                     .join(", ") || "N/A"}
                 </p>
                 <p>
-                  <strong>Địa chỉ tạm trú:</strong> {student.details.temporaryAddress || "N/A"}
+                  <strong>{t("diachitamtru")}</strong>{" "}
+                  {student.details.temporaryAddress || "N/A"}
                 </p>
                 <p>
-                  <strong>Địa chỉ nhận thư:</strong> {student.details.mailingAddress || "N/A"}
+                  <strong>{t("diachinhanthu")}</strong>{" "}
+                  {student.details.mailingAddress || "N/A"}
                 </p>
                 <p>
-                  <strong>Quốc tịch:</strong> {student.details.nationality || "N/A"}
+                  <strong>{t("quoctich")}</strong>{" "}
+                  {student.details.nationality || "N/A"}
                 </p>
               </>
             ) : (
-              <p>Không có thông tin chi tiết</p>
+              <p>{t("khongcothongtin")}</p>
             )}
           </div>
           <div className="space-y-2 pt-4 border-t">
             {student.identity ? (
               <>
                 <p>
-                  <strong>Loại giấy tờ:</strong> {student.identity.identityType}
+                  <strong>{t("loaigiayto")}</strong>{" "}
+                  {student.identity.identityType}
                 </p>
                 <p>
-                  <strong>Số giấy tờ:</strong> {student.identity.identityNumber}
+                  <strong>{t("sogiayto")}</strong>{" "}
+                  {student.identity.identityNumber}
                 </p>
                 <p>
-                  <strong>Ngày cấp:</strong>{" "}
+                  <strong>{t("ngaycap")}</strong>{" "}
                   {student.identity.issueDate
-                    ? new Date(student.identity.issueDate).toLocaleDateString("vi-VN")
+                    ? new Date(student.identity.issueDate).toLocaleDateString(
+                        "vi-VN"
+                      )
                     : "N/A"}
                 </p>
                 <p>
-                  <strong>Nơi cấp:</strong> {student.identity.issuePlace || "N/A"}
+                  <strong>{t("noicap")}</strong>{" "}
+                  {student.identity.issuePlace || "N/A"}
                 </p>
                 <p>
-                  <strong>Ngày hết hạn:</strong>{" "}
+                  <strong>{t("ngayhethan")}</strong>{" "}
                   {student.identity.expiryDate
-                    ? new Date(student.identity.expiryDate).toLocaleDateString("vi-VN")
+                    ? new Date(student.identity.expiryDate).toLocaleDateString(
+                        "vi-VN"
+                      )
                     : "N/A"}
                 </p>
                 {student.identity.identityType === "CCCD" && (
                   <p>
-                    <strong>Gắn chip:</strong> {student.identity.chipAttached ? "Có" : "Không"}
+                    <strong>{t("ganchip")}</strong>{" "}
+                    {student.identity.chipAttached ? "Có" : "Không"}
                   </p>
                 )}
                 {student.identity.identityType === "Hộ chiếu" && (
                   <>
                     <p>
-                      <strong>Quốc gia cấp:</strong> {student.identity.issuingCountry || "N/A"}
+                      <strong>{t("quocgiacap")}</strong>{" "}
+                      {student.identity.issuingCountry || "N/A"}
                     </p>
                     <p>
-                      <strong>Ghi chú:</strong> {student.identity.note || "N/A"}
+                      <strong>{t("ghichu")}</strong>{" "}
+                      {student.identity.note || "N/A"}
                     </p>
                   </>
                 )}
               </>
             ) : (
-              <p>Không có thông tin giấy tờ</p>
+              <p>{t("khongcothongtin2")}</p>
             )}
           </div>
         </div>
       </div>
+
       <div className="mt-6 flex justify-between">
         <Button variant="outline" onClick={() => router.push("/")}>
-          Trở về
+          {t("trove")}
         </Button>
         <div className="flex gap-2">
           <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
             <DialogTrigger asChild>
-              <Button onClick={handleEditOpen}>Chỉnh sửa</Button>
+              <Button onClick={handleEditOpen}>{t("chinhsua")}</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-6xl">
               <DialogHeader>
-                <DialogTitle>Chỉnh sửa Sinh viên</DialogTitle>
+                <DialogTitle>{t("chinhsua")}</DialogTitle>
               </DialogHeader>
               {editStudent && editDetails && editIdentity && (
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-4">
                     <Input
-                      placeholder="Mã sinh viên"
+                      placeholder={t("mssv")}
                       value={editStudent.studentId}
-                      onChange={(e) => setEditStudent({ ...editStudent, studentId: e.target.value })}
+                      onChange={(e) =>
+                        setEditStudent({
+                          ...editStudent,
+                          studentId: e.target.value,
+                        })
+                      }
                       disabled={isSaving}
                     />
                     <Input
-                      placeholder="Họ tên"
+                      placeholder={t("ho_ten")}
                       value={editStudent.fullName}
-                      onChange={(e) => setEditStudent({ ...editStudent, fullName: e.target.value })}
+                      onChange={(e) =>
+                        setEditStudent({
+                          ...editStudent,
+                          fullName: e.target.value,
+                        })
+                      }
                       disabled={isSaving}
                     />
                     <div className="flex items-center space-x-2">
-                      <label>Ngày sinh:</label>
+                      <label>{t("ngay_sinh")}</label>
                       <Input
                         className="w-auto"
                         type="date"
                         value={editStudent.dateOfBirth}
-                        onChange={(e) => setEditStudent({ ...editStudent, dateOfBirth: e.target.value })}
+                        onChange={(e) =>
+                          setEditStudent({
+                            ...editStudent,
+                            dateOfBirth: e.target.value,
+                          })
+                        }
                         disabled={isSaving}
                       />
                     </div>
                     <select
                       value={editStudent.gender}
-                      onChange={(e) => setEditStudent({ ...editStudent, gender: e.target.value })}
+                      onChange={(e) =>
+                        setEditStudent({
+                          ...editStudent,
+                          gender: e.target.value,
+                        })
+                      }
                       className="w-full p-2 border rounded"
                       disabled={isSaving}
                     >
-                      <option value="">Chọn giới tính</option>
+                      <option value="">
+                        {t("chon_gioi_tinh") /* key mới */}
+                      </option>
                       <option value="Nam">Nam</option>
                       <option value="Nữ">Nữ</option>
                     </select>
                     <Input
-                      placeholder="Email"
+                      placeholder="Email" /* chưa có trong bộ key, nên giữ nguyên */
                       value={editStudent.email}
-                      onChange={(e) => setEditStudent({ ...editStudent, email: e.target.value })}
+                      onChange={(e) =>
+                        setEditStudent({
+                          ...editStudent,
+                          email: e.target.value,
+                        })
+                      }
                       disabled={isSaving}
                     />
                     <Input
-                      placeholder="Số điện thoại"
+                      placeholder={t("sdt")}
                       value={editStudent.phoneNumber}
-                      onChange={(e) => setEditStudent({ ...editStudent, phoneNumber: e.target.value })}
+                      onChange={(e) =>
+                        setEditStudent({
+                          ...editStudent,
+                          phoneNumber: e.target.value,
+                        })
+                      }
                       disabled={isSaving}
                     />
                     <select
                       value={editStudent.departmentId}
-                      onChange={(e) => setEditStudent({ ...editStudent, departmentId: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setEditStudent({
+                          ...editStudent,
+                          departmentId: Number(e.target.value),
+                        })
+                      }
                       className="w-full p-2 border rounded"
                       disabled={isSaving || departments.length === 0}
                     >
-                      <option value={0}>Chọn khoa</option>
+                      <option value={0}>{t("chon_khoa") /* key mới */}</option>
                       {departments.map((dept) => (
                         <option key={dept.id} value={dept.id}>
                           {dept.name}
@@ -617,11 +773,18 @@ export default function StudentDetailPage({
                     </select>
                     <select
                       value={editStudent.statusId}
-                      onChange={(e) => setEditStudent({ ...editStudent, statusId: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setEditStudent({
+                          ...editStudent,
+                          statusId: Number(e.target.value),
+                        })
+                      }
                       className="w-full p-2 border rounded"
                       disabled={isSaving || statuses.length === 0}
                     >
-                      <option value={0}>Chọn trạng thái</option>
+                      <option value={0}>
+                        {t("chon_trang_thai") /* key mới */}
+                      </option>
                       {statuses.map((status) => (
                         <option key={status.id} value={status.id}>
                           {status.name}
@@ -630,11 +793,18 @@ export default function StudentDetailPage({
                     </select>
                     <select
                       value={editStudent.programId}
-                      onChange={(e) => setEditStudent({ ...editStudent, programId: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setEditStudent({
+                          ...editStudent,
+                          programId: Number(e.target.value),
+                        })
+                      }
                       className="w-full p-2 border rounded"
                       disabled={isSaving || programs.length === 0}
                     >
-                      <option value={0}>Chọn chương trình</option>
+                      <option value={0}>
+                        {t("chon_chuong_trinh") /* key mới */}
+                      </option>
                       {programs.map((prog) => (
                         <option key={prog.id} value={prog.id}>
                           {prog.name}
@@ -642,66 +812,105 @@ export default function StudentDetailPage({
                       ))}
                     </select>
                     <Input
-                      placeholder="Khóa (ví dụ: K45)"
+                      placeholder={t("khoas")}
                       value={editStudent.course}
-                      onChange={(e) => setEditStudent({ ...editStudent, course: e.target.value })}
+                      onChange={(e) =>
+                        setEditStudent({
+                          ...editStudent,
+                          course: e.target.value,
+                        })
+                      }
                       disabled={isSaving}
                     />
                   </div>
 
                   <div className="space-y-4">
                     <Input
-                      placeholder="Số nhà (Địa chỉ thường trú)"
+                      placeholder={t("add_student:so_nha")}
                       value={editDetails.permanentAddressHouse || ""}
                       onChange={(e) =>
-                        setEditDetails({ ...editDetails, permanentAddressHouse: e.target.value })
+                        setEditDetails({
+                          ...editDetails,
+                          permanentAddressHouse: e.target.value,
+                        })
                       }
                       disabled={isSaving}
                     />
                     <Input
-                      placeholder="Phường/Xã (Địa chỉ thường trú)"
+                      placeholder={t("add_student:phuong")}
                       value={editDetails.permanentAddressWard || ""}
-                      onChange={(e) => setEditDetails({ ...editDetails, permanentAddressWard: e.target.value })}
+                      onChange={(e) =>
+                        setEditDetails({
+                          ...editDetails,
+                          permanentAddressWard: e.target.value,
+                        })
+                      }
                       disabled={isSaving}
                     />
                     <Input
-                      placeholder="Quận/Huyện (Địa chỉ thường trú)"
+                      placeholder={t("add_student:quan")}
                       value={editDetails.permanentAddressDistrict || ""}
                       onChange={(e) =>
-                        setEditDetails({ ...editDetails, permanentAddressDistrict: e.target.value })
+                        setEditDetails({
+                          ...editDetails,
+                          permanentAddressDistrict: e.target.value,
+                        })
                       }
                       disabled={isSaving}
                     />
                     <Input
-                      placeholder="Tỉnh/Thành phố (Địa chỉ thường trú)"
+                      placeholder={t("add_student:tinh")}
                       value={editDetails.permanentAddressCity || ""}
-                      onChange={(e) => setEditDetails({ ...editDetails, permanentAddressCity: e.target.value })}
+                      onChange={(e) =>
+                        setEditDetails({
+                          ...editDetails,
+                          permanentAddressCity: e.target.value,
+                        })
+                      }
                       disabled={isSaving}
                     />
                     <Input
-                      placeholder="Quốc gia (Địa chỉ thường trú)"
+                      placeholder={t("add_student:quoc_gia")}
                       value={editDetails.permanentAddressCountry || ""}
                       onChange={(e) =>
-                        setEditDetails({ ...editDetails, permanentAddressCountry: e.target.value })
+                        setEditDetails({
+                          ...editDetails,
+                          permanentAddressCountry: e.target.value,
+                        })
                       }
                       disabled={isSaving}
                     />
                     <Input
-                      placeholder="Địa chỉ tạm trú"
+                      placeholder={t("diachitamtru")}
                       value={editDetails.temporaryAddress || ""}
-                      onChange={(e) => setEditDetails({ ...editDetails, temporaryAddress: e.target.value })}
+                      onChange={(e) =>
+                        setEditDetails({
+                          ...editDetails,
+                          temporaryAddress: e.target.value,
+                        })
+                      }
                       disabled={isSaving}
                     />
                     <Input
-                      placeholder="Địa chỉ nhận thư"
+                      placeholder={t("diachinhanthu")}
                       value={editDetails.mailingAddress || ""}
-                      onChange={(e) => setEditDetails({ ...editDetails, mailingAddress: e.target.value })}
+                      onChange={(e) =>
+                        setEditDetails({
+                          ...editDetails,
+                          mailingAddress: e.target.value,
+                        })
+                      }
                       disabled={isSaving}
                     />
                     <Input
-                      placeholder="Quốc tịch"
+                      placeholder={t("quoctich")}
                       value={editDetails.nationality || ""}
-                      onChange={(e) => setEditDetails({ ...editDetails, nationality: e.target.value })}
+                      onChange={(e) =>
+                        setEditDetails({
+                          ...editDetails,
+                          nationality: e.target.value,
+                        })
+                      }
                       disabled={isSaving}
                     />
                   </div>
@@ -709,11 +918,16 @@ export default function StudentDetailPage({
                   <div className="space-y-4">
                     <select
                       value={editIdentity.identityType}
-                      onChange={(e) => setEditIdentity({ ...editIdentity, identityType: e.target.value })}
+                      onChange={(e) =>
+                        setEditIdentity({
+                          ...editIdentity,
+                          identityType: e.target.value,
+                        })
+                      }
                       className="w-full p-2 border rounded"
                       disabled={isSaving}
                     >
-                      <option value="">Chọn loại giấy tờ</option>
+                      <option value="">{t("add_student:chon_giay_to")}</option>
                       <option value="CMND">CMND</option>
                       <option value="CCCD">CCCD</option>
                       <option value="Hộ chiếu">Hộ chiếu</option>
@@ -721,38 +935,58 @@ export default function StudentDetailPage({
                     <Input
                       placeholder={
                         editIdentity.identityType === "CMND"
-                          ? "Số CMND"
+                          ? t("add_student:so_cmnd")
                           : editIdentity.identityType === "CCCD"
-                          ? "Số CCCD"
-                          : "Số hộ chiếu"
+                          ? t("add_student:so_cccd")
+                          : t("add_student:so_ho_chieu")
                       }
                       value={editIdentity.identityNumber}
-                      onChange={(e) => setEditIdentity({ ...editIdentity, identityNumber: e.target.value })}
+                      onChange={(e) =>
+                        setEditIdentity({
+                          ...editIdentity,
+                          identityNumber: e.target.value,
+                        })
+                      }
                       disabled={isSaving}
                     />
                     <div className="flex items-center space-x-2">
-                      <label>Ngày cấp:</label>
+                      <label>{t("ngaycap")}</label>
                       <Input
                         type="date"
                         className="w-auto"
                         value={editIdentity.issueDate}
-                        onChange={(e) => setEditIdentity({ ...editIdentity, issueDate: e.target.value })}
+                        onChange={(e) =>
+                          setEditIdentity({
+                            ...editIdentity,
+                            issueDate: e.target.value,
+                          })
+                        }
                         disabled={isSaving}
                       />
                     </div>
                     <Input
-                      placeholder="Nơi cấp"
+                      placeholder={t("noicap")}
                       value={editIdentity.issuePlace}
-                      onChange={(e) => setEditIdentity({ ...editIdentity, issuePlace: e.target.value })}
+                      onChange={(e) =>
+                        setEditIdentity({
+                          ...editIdentity,
+                          issuePlace: e.target.value,
+                        })
+                      }
                       disabled={isSaving}
                     />
                     <div className="flex items-center space-x-2">
-                      <label>Ngày hết hạn:</label>
+                      <label>{t("ngayhethan")}</label>
                       <Input
                         type="date"
                         className="w-auto"
                         value={editIdentity.expiryDate}
-                        onChange={(e) => setEditIdentity({ ...editIdentity, expiryDate: e.target.value })}
+                        onChange={(e) =>
+                          setEditIdentity({
+                            ...editIdentity,
+                            expiryDate: e.target.value,
+                          })
+                        }
                         disabled={isSaving}
                       />
                     </div>
@@ -761,27 +995,38 @@ export default function StudentDetailPage({
                         <Checkbox
                           checked={editIdentity.chipAttached}
                           onCheckedChange={(checked) =>
-                            setEditIdentity({ ...editIdentity, chipAttached: checked === true })
+                            setEditIdentity({
+                              ...editIdentity,
+                              chipAttached: checked === true,
+                            })
                           }
                           disabled={isSaving}
                         />
-                        <label>Gắn chip</label>
+                        <label>{t("ganchip")}</label>
                       </div>
                     )}
                     {editIdentity.identityType === "Hộ chiếu" && (
                       <>
                         <Input
-                          placeholder="Quốc gia cấp"
+                          placeholder={t("quocgiacap")}
                           value={editIdentity.issuingCountry}
                           onChange={(e) =>
-                            setEditIdentity({ ...editIdentity, issuingCountry: e.target.value })
+                            setEditIdentity({
+                              ...editIdentity,
+                              issuingCountry: e.target.value,
+                            })
                           }
                           disabled={isSaving}
                         />
                         <Input
-                          placeholder="Ghi chú"
+                          placeholder={t("ghichu")}
                           value={editIdentity.note}
-                          onChange={(e) => setEditIdentity({ ...editIdentity, note: e.target.value })}
+                          onChange={(e) =>
+                            setEditIdentity({
+                              ...editIdentity,
+                              note: e.target.value,
+                            })
+                          }
                           disabled={isSaving}
                         />
                       </>
@@ -789,8 +1034,12 @@ export default function StudentDetailPage({
                   </div>
 
                   <div className="col-span-3 mt-4">
-                    <Button onClick={handleSave} disabled={isSaving} className="w-full">
-                      {isSaving ? "Đang lưu..." : "Lưu"}
+                    <Button
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="w-full"
+                    >
+                      {isSaving ? t("dang_luu") : t("luu")}
                     </Button>
                   </div>
                 </div>
@@ -800,22 +1049,24 @@ export default function StudentDetailPage({
 
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="destructive">Xóa sinh viên</Button>
+              <Button variant="destructive">{t("xoa_sinhvien")}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Xác nhận xóa</DialogTitle>
+                <DialogTitle>{t("xac_nhan_xoa")}</DialogTitle>
                 <DialogDescription>
-                  Bạn có chắc muốn xóa sinh viên {student.fullName} ({student.studentId})? Hành động này
-                  không thể hoàn tác.
+                  {t("xac_nhan_xoa_sv", {
+                    fullName: student.fullName,
+                    studentId: student.studentId,
+                  })}
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button variant="outline">Hủy</Button>
+                  <Button variant="outline">{t("huy")}</Button>
                 </DialogClose>
                 <Button variant="destructive" onClick={handleDelete}>
-                  Xóa
+                  {t("xoa")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -823,28 +1074,34 @@ export default function StudentDetailPage({
 
           <Dialog open={isGradesOpen} onOpenChange={setIsGradesOpen}>
             <DialogTrigger asChild>
-              <Button onClick={handleGradesOpen}>Xem kết quả học tập</Button>
+              <Button onClick={handleGradesOpen}>
+                {t("xem_ket_qua_hoc_tap")}
+              </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-4xl">
               <DialogHeader>
-                <DialogTitle>Kết quả học tập của {student?.fullName}</DialogTitle>
+                <DialogTitle>
+                  {t("ket_qua_hoc_tap_cua", { fullName: student?.fullName })}
+                </DialogTitle>
               </DialogHeader>
               {isGradesLoading ? (
                 <div className="flex justify-center p-4">
-                  <p>Đang tải...</p>
+                  <p>{t("dang_tai")}</p>
                 </div>
               ) : grades.length === 0 ? (
-                <p className="text-center text-gray-500 py-4">Không có kết quả học tập</p>
+                <p className="text-center text-gray-500 py-4">
+                  {t("khong_co_ket_qua_hoc_tap")}
+                </p>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Mã lớp</TableHead>
-                      <TableHead>Tên môn học</TableHead>
-                      <TableHead>Số tín chỉ</TableHead>
-                      <TableHead>Điểm</TableHead>
-                      <TableHead>Trạng thái</TableHead>
-                      <TableHead>Kỳ học</TableHead>
+                      <TableHead>{t("ma_lop")}</TableHead>
+                      <TableHead>{t("ten_mon_hoc")}</TableHead>
+                      <TableHead>{t("so_tin_chi")}</TableHead>
+                      <TableHead>{t("diem")}</TableHead>
+                      <TableHead>{t("trang_thai")}</TableHead>
+                      <TableHead>{t("ky_hoc")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -856,14 +1113,19 @@ export default function StudentDetailPage({
                         <TableCell>{grade.grade ?? "N/A"}</TableCell>
                         <TableCell>
                           {grade.status === "active"
-                            ? "Đang học"
+                            ? t("dang_hoc")
                             : grade.status === "passed"
-                            ? "Đã hoàn thành"
-                            : "Chưa hoàn thành"}
+                            ? t("da_hoan_thanh")
+                            : t("chua_hoan_thanh")}
                         </TableCell>
                         <TableCell>
-                          {new Date(grade.Class.Semester.startDate).toLocaleDateString("vi-VN")} -{" "}
-                          {new Date(grade.Class.Semester.endDate).toLocaleDateString("vi-VN")}
+                          {new Date(
+                            grade.Class.Semester.startDate
+                          ).toLocaleDateString("vi-VN")}{" "}
+                          -{" "}
+                          {new Date(
+                            grade.Class.Semester.endDate
+                          ).toLocaleDateString("vi-VN")}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -871,11 +1133,14 @@ export default function StudentDetailPage({
                 </Table>
               )}
               <DialogFooter>
-                <Button onClick={generateTranscriptPDF} disabled={isGradesLoading}>
-                  In bản điểm
+                <Button
+                  onClick={generateTranscriptPDF}
+                  disabled={isGradesLoading}
+                >
+                  {t("in_ban_diem")}
                 </Button>
                 <DialogClose asChild>
-                  <Button variant="outline">Đóng</Button>
+                  <Button variant="outline">{t("dong")}</Button>
                 </DialogClose>
               </DialogFooter>
             </DialogContent>

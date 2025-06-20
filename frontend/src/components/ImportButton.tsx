@@ -1,7 +1,7 @@
-// components/ImportButton.tsx
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -9,9 +9,9 @@ import { toast } from "sonner";
 interface onDoneProps {
     onOptionsUpdated: () => void;
 }
-  
 
-export default function ImportButton({onOptionsUpdated} : onDoneProps ) {
+export default function ImportButton({ onOptionsUpdated }: onDoneProps) {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
 
@@ -23,7 +23,7 @@ export default function ImportButton({onOptionsUpdated} : onDoneProps ) {
 
   const handleImport = async () => {
     if (!file) {
-      toast.error("Vui lòng chọn file để import!");
+      toast.error(t("import_file:khong_co_file"));
       return;
     }
 
@@ -39,15 +39,15 @@ export default function ImportButton({onOptionsUpdated} : onDoneProps ) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to import students");
+        throw new Error(errorData.error || t("import_file:nhap_that_bai"));
       }
 
-      toast.success("Import thành công!");
+      toast.success(t("import_file:nhap_thanh_cong"));
       onOptionsUpdated();
       setFile(null); // Reset file sau khi import
-    } catch (error : any) {
+    } catch (error: any) {
       console.error("Error importing students:", error);
-      toast.error(error.message || "Import thất bại!");
+      toast.error(error.message || t("import_file:nhap_that_bai"));
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +63,7 @@ export default function ImportButton({onOptionsUpdated} : onDoneProps ) {
         className="w-auto"
       />
       <Button onClick={handleImport} disabled={isLoading}>
-        {isLoading ? "Đang import..." : "Import"}
+        {isLoading ? t("import_file:dang_nhap") : t("import_file:nhap")}
       </Button>
     </div>
   );

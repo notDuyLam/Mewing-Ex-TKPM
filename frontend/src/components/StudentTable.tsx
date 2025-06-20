@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Table,
   TableBody,
@@ -57,7 +58,7 @@ interface StudentTableProps {
   currentPage: number;
   pageSize: number;
   onPageChange: (page: number) => void;
-  onSelectStudents: (studentIds: string[]) => void; // Renamed for clarity
+  onSelectStudents: (studentIds: string[]) => void;
 }
 
 export default function StudentTable({
@@ -68,6 +69,7 @@ export default function StudentTable({
   onPageChange,
   onSelectStudents,
 }: StudentTableProps) {
+  const { t } = useTranslation("student_table");
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
   const handlePageChange = (page: number) => {
@@ -86,7 +88,7 @@ export default function StudentTable({
       updatedSelection = updatedSelection.filter((id) => id !== studentId);
     }
     setSelectedStudents(updatedSelection);
-    onSelectStudents(updatedSelection); // Pass selected IDs to parent
+    onSelectStudents(updatedSelection);
   };
 
   return (
@@ -96,7 +98,10 @@ export default function StudentTable({
           <TableRow>
             <TableHead>
               <Checkbox
-                checked={selectedStudents.length === students.length && students.length > 0}
+                checked={
+                  selectedStudents.length === students.length &&
+                  students.length > 0
+                }
                 onCheckedChange={(checked) => {
                   if (checked) {
                     const allIds = students.map((student) => student.studentId);
@@ -109,16 +114,16 @@ export default function StudentTable({
                 }}
               />
             </TableHead>
-            <TableHead>MSSV</TableHead>
-            <TableHead>Họ tên</TableHead>
-            <TableHead>Ngày sinh</TableHead>
-            <TableHead>Giới tính</TableHead>
-            <TableHead>Khoa</TableHead>
-            <TableHead>Khóa</TableHead>
-            <TableHead>Chương trình</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Số điện thoại</TableHead>
-            <TableHead>Tình trạng</TableHead>
+            <TableHead>{t("mssv")}</TableHead>
+            <TableHead>{t("hoten")}</TableHead>
+            <TableHead>{t("ngay_sinh")}</TableHead>
+            <TableHead>{t("gioi_tinh")}</TableHead>
+            <TableHead>{t("khoa")}</TableHead>
+            <TableHead>{t("khoas")}</TableHead>
+            <TableHead>{t("chuong_trinh")}</TableHead>
+            <TableHead>{t("email")}</TableHead>
+            <TableHead>{t("sdt")}</TableHead>
+            <TableHead>{t("tinh_trang")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -129,13 +134,19 @@ export default function StudentTable({
                   <Checkbox
                     checked={selectedStudents.includes(student.studentId)}
                     onCheckedChange={(checked) =>
-                      handleCheckboxChange(student.studentId, checked as boolean)
+                      handleCheckboxChange(
+                        student.studentId,
+                        checked as boolean
+                      )
                     }
                   />
                 </TableCell>
                 <TableCell>{student.studentId}</TableCell>
                 <TableCell>
-                  <Link className="text-gray-800 underline" href={`/students/${student.studentId}`}>
+                  <Link
+                    className="text-gray-800 underline"
+                    href={`/students/${student.studentId}`}
+                  >
                     {student.fullName}
                   </Link>
                 </TableCell>
@@ -160,7 +171,7 @@ export default function StudentTable({
           ) : (
             <TableRow>
               <TableCell colSpan={11} className="text-center">
-                Không có dữ liệu
+                {t("khong_du_lieu")}
               </TableCell>
             </TableRow>
           )}
@@ -173,7 +184,9 @@ export default function StudentTable({
             <PaginationItem>
               <PaginationPrevious
                 onClick={() => handlePageChange(currentPage - 1)}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                className={
+                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                }
               />
             </PaginationItem>
             {Array.from({ length: totalPages }, (_, i) => (
@@ -189,7 +202,11 @@ export default function StudentTable({
             <PaginationItem>
               <PaginationNext
                 onClick={() => handlePageChange(currentPage + 1)}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                className={
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
               />
             </PaginationItem>
           </PaginationContent>

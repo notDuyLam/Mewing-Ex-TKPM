@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -103,6 +104,7 @@ interface ClassStudent {
 }
 
 export default function ClassDetail() {
+  const { t } = useTranslation();
   const { classId } = useParams();
   const [classData, setClassData] = useState<Class | null>(null);
   const [students, setStudents] = useState<ClassStudent[]>([]);
@@ -124,7 +126,7 @@ export default function ClassDetail() {
 
       if (!res.ok) {
         const _data = await res.json();
-        toast.error(_data.message || "Không thể tải thông tin lớp học!");
+        toast.error(_data.message || t("class_detail:khong_the_tai_thong_tin_lop_hoc"));
         return;
       }
 
@@ -139,7 +141,7 @@ export default function ClassDetail() {
       }
     } catch (error) {
       console.error("Error fetching class:", error);
-      toast.error("Không thể tải thông tin lớp học!");
+      toast.error(t("class_detail:khong_the_tai_thong_tin_lop_hoc"));
     }
   };
 
@@ -155,7 +157,7 @@ export default function ClassDetail() {
 
       if (!res.ok) {
         const _data = await res.json();
-        toast.error(_data.message || "Không thể tải danh sách sinh viên!");
+        toast.error(_data.message || t("class_detail:khong_the_tai_danh_sach_sinh_vien"));
         return;
       }
 
@@ -163,7 +165,7 @@ export default function ClassDetail() {
       setStudents(data || []);
     } catch (error) {
       console.error("Error fetching students:", error);
-      toast.error("Không thể tải danh sách sinh viên!");
+      toast.error(t("class_detail:khong_the_tai_danh_sach_sinh_vien"));
     }
   };
 
@@ -176,7 +178,7 @@ export default function ClassDetail() {
 
       if (!res.ok) {
         const _data = await res.json();
-        toast.error(_data.message || "Không thể tải danh sách sinh viên!");
+        toast.error(_data.message || t("class_detail:khong_the_tai_danh_sach_sinh_vien"));
         return;
       }
 
@@ -185,12 +187,12 @@ export default function ClassDetail() {
       // Filter out students already enrolled in this class
       const enrolledStudentIds = students.map((s) => s.studentId);
       const available = _data.filter(
-        (student : Student) => !enrolledStudentIds.includes(student.studentId)
+        (student: Student) => !enrolledStudentIds.includes(student.studentId)
       );
       setAvailableStudents(available || []);
     } catch (error) {
       console.error("Error fetching available students:", error);
-      toast.error("Không thể tải danh sách sinh viên!");
+      toast.error(t("class_detail:khong_the_tai_danh_sach_sinh_vien"));
     }
   };
 
@@ -206,7 +208,7 @@ export default function ClassDetail() {
 
   const handleRegisterStudent = async () => {
     if (!selectedStudentId) {
-      toast.error("Vui lòng chọn sinh viên!");
+      toast.error(t("class_detail:vui_long_chon_sinh_vien"));
       return;
     }
 
@@ -222,17 +224,17 @@ export default function ClassDetail() {
 
       if (!res.ok) {
         const _data = await res.json();
-        toast.error(_data.message || "Không thể đăng ký sinh viên!");
+        toast.error(_data.message || t("class_detail:khong_the_dang_ky_sinh_vien"));
         return;
       }
 
-      toast.success("Đăng ký sinh viên thành công!");
+      toast.success(t("class_detail:dang_ky_sinh_vien_thanh_cong"));
       setSelectedStudentId("");
       setIsAddDialogOpen(false);
       await Promise.all([fetchStudents(), fetchAvailableStudents()]);
     } catch (error) {
       console.error("Error registering student:", error);
-      toast.error("Không thể đăng ký sinh viên!");
+      toast.error(t("class_detail:khong_the_dang_ky_sinh_vien"));
     }
   };
 
@@ -249,25 +251,25 @@ export default function ClassDetail() {
 
       if (!res.ok) {
         const _data = await res.json();
-        toast.error(_data.message || "Không thể hủy đăng ký sinh viên!");
+        toast.error(_data.message || t("class_detail:khong_the_huy_dang_ky_sinh_vien"));
         return;
       }
 
-      toast.success("Hủy đăng ký sinh viên thành công!");
+      toast.success(t("class_detail:huy_dang_ky_sinh_vien_thanh_cong"));
       await Promise.all([fetchStudents(), fetchAvailableStudents()]);
     } catch (error) {
       console.error("Error deregistering student:", error);
-      toast.error("Không thể hủy đăng ký sinh viên!");
+      toast.error(t("class_detail:khong_the_huy_dang_ky_sinh_vien"));
     }
   };
 
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return "Invalid Date";
+      if (isNaN(date.getTime())) return t("class_detail:ngay_khong_hop_le");
       return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
     } catch {
-      return "Invalid Date";
+      return t("class_detail:ngay_khong_hop_le");
     }
   };
 
@@ -278,41 +280,41 @@ export default function ClassDetail() {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Chi tiết Lớp học</h1>
+        <h1 className="text-2xl font-bold mb-4">{t("class_detail:chi_tiet_lop_hoc")}</h1>
         {isLoading ? (
-          <div className="text-center">Đang tải dữ liệu...</div>
+          <div className="text-center">{t("class_detail:dang_tai_du_lieu")}</div>
         ) : !classData ? (
-          <div className="text-center">Không tìm thấy lớp học</div>
+          <div className="text-center">{t("class_detail:khong_tim_thay_lop_hoc")}</div>
         ) : (
           <>
             <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-              <h2 className="text-xl font-semibold mb-4">Thông tin Lớp học</h2>
+              <h2 className="text-xl font-semibold mb-4">{t("class_detail:thong_tin_lop_hoc")}</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p>
-                    <strong>Mã Lớp học:</strong> {classData.classId}
+                    <strong>{t("class_detail:ma_lop_hoc")}:</strong> {classData.classId}
                   </p>
                   <p>
-                    <strong>Khóa học:</strong>{" "}
+                    <strong>{t("class_detail:khoa_hoc")}:</strong>{" "}
                     {classData.Course?.courseName || "N/A"}
                   </p>
                   <p>
-                    <strong>Mô tả khóa học:</strong>{" "}
+                    <strong>{t("class_detail:mo_ta_khoa_hoc")}:</strong>{" "}
                     {classData.Course?.description || "N/A"}
                   </p>
                   <p>
-                    <strong>Số tín chỉ:</strong>{" "}
+                    <strong>{t("class_detail:so_tin_chi")}:</strong>{" "}
                     {classData.Course?.credits || "N/A"}
                   </p>
                   <p>
-                    <strong>Trạng thái khóa học:</strong>{" "}
+                    <strong>{t("class_detail:trang_thai_khoa_hoc")}:</strong>{" "}
                     {classData.Course?.status || "N/A"}
                   </p>
                   <p>
-                    <strong>Năm học:</strong> {classData.year}
+                    <strong>{t("class_detail:nam_hoc")}:</strong> {classData.year}
                   </p>
                   <p>
-                    <strong>Học kỳ:</strong>{" "}
+                    <strong>{t("class_detail:hoc_ky")}:</strong>{" "}
                     {classData.Semester
                       ? getSemesterDisplay(classData.Semester)
                       : "N/A"}
@@ -320,31 +322,31 @@ export default function ClassDetail() {
                 </div>
                 <div>
                   <p>
-                    <strong>Giáo viên:</strong>{" "}
+                    <strong>{t("class_detail:giao_vien")}:</strong>{" "}
                     {classData.Teacher?.name || "N/A"}
                   </p>
                   <p>
-                    <strong>Số sinh viên tối đa:</strong>{" "}
+                    <strong>{t("class_detail:so_sinh_vien_toi_da")}:</strong>{" "}
                     {classData.maxStudent}
                   </p>
                   <p>
-                    <strong>Lịch học:</strong> {classData.schedule}
+                    <strong>{t("class_detail:lich_hoc")}:</strong> {classData.schedule}
                   </p>
                   <p>
-                    <strong>Phòng học:</strong> {classData.room}
+                    <strong>{t("class_detail:phong_hoc")}:</strong> {classData.room}
                   </p>
                   <p>
-                    <strong>Ngày tạo:</strong> {formatDate(classData.createdAt)}
+                    <strong>{t("class_detail:ngay_tao")}:</strong> {formatDate(classData.createdAt)}
                   </p>
                   <p>
-                    <strong>Ngày cập nhật:</strong>{" "}
+                    <strong>{t("class_detail:ngay_cap_nhat")}:</strong>{" "}
                     {formatDate(classData.updatedAt)}
                   </p>
                 </div>
               </div>
               <div className="mt-4 flex gap-2">
                 <Link href="/classes">
-                  <Button variant="outline">Quay lại</Button>
+                  <Button variant="outline">{t("class_detail:quay_lai")}</Button>
                 </Link>
                 {canModify && (
                   <Dialog
@@ -352,26 +354,26 @@ export default function ClassDetail() {
                     onOpenChange={setIsAddDialogOpen}
                   >
                     <DialogTrigger asChild>
-                      <Button>Thêm Sinh viên</Button>
+                      <Button>{t("class_detail:them_sinh_vien")}</Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Đăng ký Sinh viên</DialogTitle>
+                        <DialogTitle>{t("class_detail:dang_ky_sinh_vien")}</DialogTitle>
                         <DialogDescription>
-                          Chọn sinh viên để đăng ký vào lớp học.
+                          {t("class_detail:chon_sinh_vien")}
                         </DialogDescription>
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                           <label htmlFor="studentId" className="text-right">
-                            Sinh viên
+                            {t("class_detail:sinh_vien")}
                           </label>
                           <Select
                             value={selectedStudentId}
                             onValueChange={setSelectedStudentId}
                           >
                             <SelectTrigger className="col-span-3">
-                              <SelectValue placeholder="Chọn sinh viên" />
+                              <SelectValue placeholder={t("class_detail:chon_sinh_vien")} />
                             </SelectTrigger>
                             <SelectContent>
                               {availableStudents.length > 0 ? (
@@ -385,7 +387,7 @@ export default function ClassDetail() {
                                 ))
                               ) : (
                                 <SelectItem value="0" disabled>
-                                  Không có sinh viên nào
+                                  {t("class_detail:khong_co_sinh_vien")}
                                 </SelectItem>
                               )}
                             </SelectContent>
@@ -394,13 +396,13 @@ export default function ClassDetail() {
                       </div>
                       <DialogFooter>
                         <DialogClose asChild>
-                          <Button variant="outline">Hủy</Button>
+                          <Button variant="outline">{t("class_detail:huy")}</Button>
                         </DialogClose>
                         <Button
                           onClick={handleRegisterStudent}
                           disabled={!selectedStudentId}
                         >
-                          Đăng ký
+                          {t("class_detail:dang_ky")}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
@@ -410,19 +412,17 @@ export default function ClassDetail() {
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold mb-4">
-                Danh sách Sinh viên
-              </h2>
+              <h2 className="text-xl font-semibold mb-4">{t("class_detail:danh_sach_sinh_vien")}</h2>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Mã Sinh viên</TableHead>
-                    <TableHead>Họ và Tên</TableHead>
-                    <TableHead>Khóa học</TableHead>
-                    <TableHead>Khoa</TableHead>
-                    <TableHead>Ngày đăng ký</TableHead>
-                    <TableHead>Trạng thái</TableHead>
-                    {canModify && <TableHead>Hành động</TableHead>}
+                    <TableHead>{t("class_detail:ma_sinh_vien")}</TableHead>
+                    <TableHead>{t("class_detail:ho_va_ten")}</TableHead>
+                    <TableHead>{t("class_detail:khoa_hoc_sinh_vien")}</TableHead>
+                    <TableHead>{t("class_detail:khoa")}</TableHead>
+                    <TableHead>{t("class_detail:ngay_dang_ky")}</TableHead>
+                    <TableHead>{t("class_detail:trang_thai")}</TableHead>
+                    {canModify && <TableHead>{t("class_detail:hanh_dong")}</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -445,7 +445,7 @@ export default function ClassDetail() {
                                 handleDeregisterStudent(student.studentId)
                               }
                             >
-                              Xóa
+                              {t("class_detail:xoa")}
                             </Button>
                           </TableCell>
                         )}
@@ -457,7 +457,7 @@ export default function ClassDetail() {
                         colSpan={canModify ? 7 : 6}
                         className="text-center"
                       >
-                        Không có sinh viên nào
+                        {t("class_detail:khong_co_sinh_vien")}
                       </TableCell>
                     </TableRow>
                   )}

@@ -1,0 +1,6 @@
+{
+    "select_format": "Chọn định dạng file",
+    "exporting": "Đang export...",
+    "export_success": "Export thành công!",
+    "export_failed": "Export thất bại!"
+}

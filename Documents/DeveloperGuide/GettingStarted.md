@@ -68,7 +68,6 @@ Student Management
     ```
     NEXT_PUBLIC_API_URL=
     NEXT_PUBLIC_ALLOWED_PHONE_NUMBERS=[{"code":"VN","name":"Vietnam","regex":"^\\+84\\d{9,10}$"},{"code":"US","name":"United States","regex":"^\\+1\\d{10}$"},{"code":"UK","name":"United Kingdom","regex":"^\\+44\\d{10}$"}]
-    I18NEXUS_API_KEY="OhYWB2J8xKzREdq0adDrSQ"
     ```
 
 - Mặc định frontend chạy <b>PORT 3001</b>, để tùy chỉnh vào file <b>package.json</b>
@@ -87,17 +86,11 @@ npm run dev
 npm run dev
 ```
 
-# Danh mục hình ảnh minh chứng
+## Cấu Hình Đa Ngôn Ngữ
+- File dịch thuật nằm trong `frontend/src/locales/`.
+- Thêm ngôn ngữ mới bằng cách tạo thư mục (e.g., `en/`) và file JSON tương ứng.
+- Cập nhật `i18nConfig.js` trong `frontend/src/` để thêm ngôn ngữ mới.
 
-- Cho phép đổi tên & thêm mới: khoa, tình trạng sinh viên, chương trình
-
-<img src="./images/label-management.png" alt="Mô tả hình ảnh" width="auto">
-
-- Tìm kiếm theo tên khoa, khoa + tên, hỗ trợ IMPORT/EXPORT
-
-<img src="./images/main-page.png" alt="Mô tả hình ảnh" width="auto">
-
-- Logging mechanism để troubleshooting production issue & audit purposes
-
-<img src="./images/logs-1.png" alt="Mô tả hình ảnh" width="auto">
-<img src="./images/logs-2.png" alt="Mô tả hình ảnh" width="auto">
+## Lưu Ý
+- Kiểm tra tính hợp lệ của email (`@student.university.edu.vn`) và số điện thoại (`+84xxxxxxxxx`).
+- Đảm bảo tất cả thay đổi schema được thực hiện qua migrations.

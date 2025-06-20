@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 export default function ExportButton() {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [format, setFormat] = useState<"csv" | "excel">("csv");
 
@@ -31,10 +33,10 @@ export default function ExportButton() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      toast.success("Export thành công!");
+      toast.success(t("export_file:export_success"));
     } catch (error : any) {
       console.error("Error exporting students:", error);
-      toast.error(error.message || "Export thất bại!");
+      toast.error(error.message || t("export_file:export_failed"));
     } finally {
       setIsLoading(false);
     }
@@ -44,7 +46,7 @@ export default function ExportButton() {
     <div className="flex items-center space-x-2">
       <Select value={format} onValueChange={(value: "csv" | "excel") => setFormat(value)}>
         <SelectTrigger className="w-[100px]">
-          <SelectValue placeholder="Chọn định dạng" />
+          <SelectValue placeholder= {t("export_file:select_format")} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="csv">CSV</SelectItem>
@@ -52,7 +54,7 @@ export default function ExportButton() {
         </SelectContent>
       </Select>
       <Button onClick={handleExport} disabled={isLoading}>
-        {isLoading ? "Đang export..." : "Export"}
+        {isLoading ? t("export_file:exporting") : "Export"}
       </Button>
     </div>
   );

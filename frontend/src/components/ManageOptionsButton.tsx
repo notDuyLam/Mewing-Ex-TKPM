@@ -1,6 +1,7 @@
 // components/ManageOptionsButton.tsx
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -33,7 +34,9 @@ interface ManageOptionsButtonProps {
   onOptionsUpdated: () => void;
 }
 
-export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsButtonProps) {
+export default function ManageOptionsButton({
+  onOptionsUpdated,
+}: ManageOptionsButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [statuses, setStatuses] = useState<Status[]>([]);
@@ -46,13 +49,20 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
   const [editProgram, setEditProgram] = useState<Program | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Hàm lấy dữ liệu từ API
+  const { t } = useTranslation();
+
   const fetchData = async () => {
     try {
       const [deptRes, statusRes, progRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/departments/`, { method: "GET" }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/statuses/`, { method: "GET" }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/`, { method: "GET" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/departments/`, {
+          method: "GET",
+        }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/statuses/`, {
+          method: "GET",
+        }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/`, {
+          method: "GET",
+        }),
       ]);
 
       if (!deptRes.ok || !statusRes.ok || !progRes.ok) {
@@ -76,7 +86,6 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
     fetchData();
   }, []);
 
-  // Thêm mới
   const handleAdd = async (type: "department" | "status" | "program") => {
     setIsLoading(true);
     let url = "";
@@ -86,7 +95,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
     switch (type) {
       case "department":
         if (!newDepartment.trim()) {
-          toast.error("Tên khoa không được để trống");
+          toast.error(t("manage_options:khoa_khong_de_trong"));
           setIsLoading(false);
           return;
         }
@@ -96,7 +105,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
         break;
       case "status":
         if (!newStatus.trim()) {
-          toast.error("Tên trạng thái không được để trống");
+          toast.error(t("manage_options:trang_thai_khong_de_trong"));
           setIsLoading(false);
           return;
         }
@@ -106,7 +115,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
         break;
       case "program":
         if (!newProgram.trim()) {
-          toast.error("Tên chương trình không được để trống");
+          toast.error(t("manage_options:chuong_trinh_khong_de_trong"));
           setIsLoading(false);
           return;
         }
@@ -130,9 +139,11 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
       }
 
       setNewValue("");
-      await fetchData(); // Làm mới toàn bộ danh sách
+      await fetchData();
       onOptionsUpdated();
-      toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} added successfully`);
+      toast.success(
+        `${type.charAt(0).toUpperCase() + type.slice(1)} added successfully`
+      );
     } catch (error) {
       console.error(`Error adding ${type}:`, error);
       toast.error("An unexpected error occurred");
@@ -141,7 +152,6 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
     }
   };
 
-  // Chỉnh sửa
   const handleEdit = async (type: "department" | "status" | "program") => {
     setIsLoading(true);
     let url = "";
@@ -150,7 +160,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
     switch (type) {
       case "department":
         if (!editDepartment?.name.trim()) {
-          toast.error("Tên khoa không được để trống");
+          toast.error(t("manage_options:khoa_khong_de_trong"));
           setIsLoading(false);
           return;
         }
@@ -159,7 +169,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
         break;
       case "status":
         if (!editStatus?.name.trim()) {
-          toast.error("Tên trạng thái không được để trống");
+          toast.error(t("manage_options:trang_thai_khong_de_trong"));
           setIsLoading(false);
           return;
         }
@@ -168,7 +178,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
         break;
       case "program":
         if (!editProgram?.name.trim()) {
-          toast.error("Tên chương trình không được để trống");
+          toast.error(t("manage_options:chuong_trinh_khong_de_trong"));
           setIsLoading(false);
           return;
         }
@@ -190,12 +200,14 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
         return;
       }
 
-      await fetchData(); // Làm mới toàn bộ danh sách
+      await fetchData();
       setEditDepartment(null);
       setEditStatus(null);
       setEditProgram(null);
       onOptionsUpdated();
-      toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} updated successfully`);
+      toast.success(
+        `${type.charAt(0).toUpperCase() + type.slice(1)} updated successfully`
+      );
     } catch (error) {
       console.error(`Error updating ${type}:`, error);
       toast.error("An unexpected error occurred");
@@ -207,19 +219,21 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>Quản lý Tùy chọn</Button>
+        <Button>{t("manage_options:quan_ly_tuy_chon")}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-7xl">
         <DialogHeader>
-          <DialogTitle>Quản lý Khoa, Trạng thái, Chương trình</DialogTitle>
+          <DialogTitle>{t("manage_options:quan_ly")}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-3 gap-6">
           {/* Khoa */}
           <div>
-            <h3 className="text-lg font-semibold mb-2">Khoa</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              {t("manage_options:khoa")}
+            </h3>
             <div className="flex gap-2 mb-2">
               <Input
-                placeholder="Tên khoa mới"
+                placeholder={t("manage_options:ten_khoa_moi")}
                 value={newDepartment}
                 onChange={(e) => setNewDepartment(e.target.value)}
                 disabled={isLoading}
@@ -228,7 +242,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
                 onClick={() => handleAdd("department")}
                 disabled={isLoading}
               >
-                Thêm
+                {t("manage_options:them")}
               </Button>
             </div>
             <div className="max-h-40 overflow-y-auto border rounded p-2">
@@ -242,7 +256,10 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
                       <Input
                         value={editDepartment.name}
                         onChange={(e) =>
-                          setEditDepartment({ ...editDepartment, name: e.target.value })
+                          setEditDepartment({
+                            ...editDepartment,
+                            name: e.target.value,
+                          })
                         }
                         className="flex-grow"
                         disabled={isLoading}
@@ -252,7 +269,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
                         onClick={() => handleEdit("department")}
                         disabled={isLoading}
                       >
-                        Lưu
+                        {t("manage_options:luu")}
                       </Button>
                       <Button
                         size="sm"
@@ -260,7 +277,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
                         onClick={() => setEditDepartment(null)}
                         disabled={isLoading}
                       >
-                        Hủy
+                        {t("manage_options:huy")}
                       </Button>
                     </div>
                   ) : (
@@ -279,16 +296,18 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
 
           {/* Trạng thái */}
           <div>
-            <h3 className="text-lg font-semibold mb-2">Trạng thái</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              {t("manage_options:trang_thai")}
+            </h3>
             <div className="flex gap-2 mb-2">
               <Input
-                placeholder="Tên trạng thái mới"
+                placeholder={t("manage_options:ten_trang_thai_moi")}
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value)}
                 disabled={isLoading}
               />
               <Button onClick={() => handleAdd("status")} disabled={isLoading}>
-                Thêm
+                {t("manage_options:them")}
               </Button>
             </div>
             <div className="max-h-40 overflow-y-auto border rounded p-2">
@@ -312,7 +331,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
                         onClick={() => handleEdit("status")}
                         disabled={isLoading}
                       >
-                        Lưu
+                        {t("manage_options:luu")}
                       </Button>
                       <Button
                         size="sm"
@@ -320,7 +339,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
                         onClick={() => setEditStatus(null)}
                         disabled={isLoading}
                       >
-                        Hủy
+                        {t("manage_options:huy")}
                       </Button>
                     </div>
                   ) : (
@@ -339,19 +358,18 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
 
           {/* Chương trình */}
           <div>
-            <h3 className="text-lg font-semibold mb-2">Chương trình</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              {t("manage_options:chuong_trinh")}
+            </h3>
             <div className="flex gap-2 mb-2">
               <Input
-                placeholder="Tên chương trình mới"
+                placeholder={t("manage_options:ten_chuong_trinh_moi")}
                 value={newProgram}
                 onChange={(e) => setNewProgram(e.target.value)}
                 disabled={isLoading}
               />
-              <Button
-                onClick={() => handleAdd("program")}
-                disabled={isLoading}
-              >
-                Thêm
+              <Button onClick={() => handleAdd("program")} disabled={isLoading}>
+                {t("manage_options:them")}
               </Button>
             </div>
             <div className="max-h-40 overflow-y-auto border rounded p-2">
@@ -365,7 +383,10 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
                       <Input
                         value={editProgram.name}
                         onChange={(e) =>
-                          setEditProgram({ ...editProgram, name: e.target.value })
+                          setEditProgram({
+                            ...editProgram,
+                            name: e.target.value,
+                          })
                         }
                         className="flex-grow"
                         disabled={isLoading}
@@ -375,7 +396,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
                         onClick={() => handleEdit("program")}
                         disabled={isLoading}
                       >
-                        Lưu
+                        {t("manage_options:luu")}
                       </Button>
                       <Button
                         size="sm"
@@ -383,7 +404,7 @@ export default function ManageOptionsButton({ onOptionsUpdated }: ManageOptionsB
                         onClick={() => setEditProgram(null)}
                         disabled={isLoading}
                       >
-                        Hủy
+                        {t("manage_options:huy")}
                       </Button>
                     </div>
                   ) : (

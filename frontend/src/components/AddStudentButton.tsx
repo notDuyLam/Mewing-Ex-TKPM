@@ -1,6 +1,7 @@
 // components/AddStudentButton.tsx
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -70,7 +71,9 @@ interface AddStudentButtonProps {
   onStudentAdded: () => void;
 }
 
-export default function AddStudentButton({ onStudentAdded }: AddStudentButtonProps) {
+export default function AddStudentButton({
+  onStudentAdded,
+}: AddStudentButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [newStudent, setNewStudent] = useState<Student>({
     studentId: "",
@@ -95,17 +98,18 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
     mailingAddress: "",
     nationality: "",
   });
-  const [newIdentityDocuments, setNewIdentityDocuments] = useState<IdentityDocuments>({
-    studentId: "",
-    identityType: "",
-    identityNumber: "",
-    issueDate: "",
-    issuePlace: "",
-    expiryDate: "",
-    chipAttached: false,
-    issuingCountry: "",
-    note: "",
-  });
+  const [newIdentityDocuments, setNewIdentityDocuments] =
+    useState<IdentityDocuments>({
+      studentId: "",
+      identityType: "",
+      identityNumber: "",
+      issueDate: "",
+      issuePlace: "",
+      expiryDate: "",
+      chipAttached: false,
+      issuingCountry: "",
+      note: "",
+    });
   const [departments, setDepartments] = useState<Department[]>([]);
   const [statuses, setStatuses] = useState<Status[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -115,9 +119,15 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
     const fetchData = async () => {
       try {
         const [deptRes, statusRes, progRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/departments/`, { method: "GET" }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/statuses/`, { method: "GET" }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/`, { method: "GET" }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/departments/`, {
+            method: "GET",
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/statuses/`, {
+            method: "GET",
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/programs/`, {
+            method: "GET",
+          }),
         ]);
 
         if (!deptRes.ok || !statusRes.ok || !progRes.ok) {
@@ -187,17 +197,23 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
       return false;
     }
     let isPhoneNumberValid = false;
-    const validationPhoneNumber = JSON.parse(process.env.NEXT_PUBLIC_ALLOWED_PHONE_NUMBERS || "[]");
-    for(let i = 0; i < validationPhoneNumber.length; i++) {
-        const phoneRegex = new RegExp(validationPhoneNumber[i].regex);
-        if (phoneRegex.test(newStudent.phoneNumber)) {
-            isPhoneNumberValid = true;
-        }
+    const validationPhoneNumber = JSON.parse(
+      process.env.NEXT_PUBLIC_ALLOWED_PHONE_NUMBERS || "[]"
+    );
+    for (let i = 0; i < validationPhoneNumber.length; i++) {
+      const phoneRegex = new RegExp(validationPhoneNumber[i].regex);
+      if (phoneRegex.test(newStudent.phoneNumber)) {
+        isPhoneNumberValid = true;
+      }
     }
-    if(!isPhoneNumberValid) {
-        const allowedCountries = validationPhoneNumber.map((e: any) => e.name);
-        toast.error(`Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(", ")}`);
-        return false;
+    if (!isPhoneNumberValid) {
+      const allowedCountries = validationPhoneNumber.map((e: any) => e.name);
+      toast.error(
+        `Số điện thoại không hợp lệ hoặc không thuộc vùng: ${allowedCountries.join(
+          ", "
+        )}`
+      );
+      return false;
     }
     // Validate IdentityDocuments
     if (newIdentityDocuments.identityType) {
@@ -216,11 +232,14 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
     setIsLoading(true);
     try {
       // Tạo Student
-      const studentRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/students`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newStudent),
-      });
+      const studentRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/students`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newStudent),
+        }
+      );
 
       if (!studentRes.ok) {
         const errorData = await studentRes.json();
@@ -229,12 +248,18 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
       }
 
       // Tạo StudentDetails
-      const studentDetailsData = { ...newStudentDetails, studentId: newStudent.studentId };
-      const detailsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student-details`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(studentDetailsData),
-      });
+      const studentDetailsData = {
+        ...newStudentDetails,
+        studentId: newStudent.studentId,
+      };
+      const detailsRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/student-details`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(studentDetailsData),
+        }
+      );
 
       if (!detailsRes.ok) {
         const errorData = await detailsRes.json();
@@ -248,11 +273,14 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
           ...newIdentityDocuments,
           studentId: newStudent.studentId,
         };
-        const identityRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/identity-documents`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(identityDocumentsData),
-        });
+        const identityRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/identity-documents`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(identityDocumentsData),
+          }
+        );
 
         if (!identityRes.ok) {
           const errorData = await identityRes.json();
@@ -306,71 +334,88 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
     }
   };
 
+  const { t } = useTranslation();
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>Thêm Sinh viên</Button>
+        <Button>{t("add_student:them_sv")}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-6xl">
         <DialogHeader>
-          <DialogTitle>Thêm Sinh viên Mới</DialogTitle>
+          <DialogTitle>{t("add_student:them_sv_moi")}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-3 gap-4">
           {/* Cột 1: Thông tin Student */}
           <div className="space-y-4">
             <Input
-              placeholder="Mã sinh viên"
+              placeholder={t("add_student:ma_sv")}
               value={newStudent.studentId}
-              onChange={(e) => setNewStudent({ ...newStudent, studentId: e.target.value })}
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, studentId: e.target.value })
+              }
               disabled={isLoading}
             />
             <Input
-              placeholder="Họ tên"
+              placeholder={t("add_student:hoten")}
               value={newStudent.fullName}
-              onChange={(e) => setNewStudent({ ...newStudent, fullName: e.target.value })}
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, fullName: e.target.value })
+              }
               disabled={isLoading}
             />
             <div className="flex items-center space-x-2">
-              <label>Ngày sinh:</label>
+              <label>{t("add_student:ngay_sinh")}:</label>
               <Input
                 className="w-auto"
                 type="date"
                 value={newStudent.dateOfBirth}
-                onChange={(e) => setNewStudent({ ...newStudent, dateOfBirth: e.target.value })}
+                onChange={(e) =>
+                  setNewStudent({ ...newStudent, dateOfBirth: e.target.value })
+                }
                 disabled={isLoading}
               />
             </div>
             <select
               value={newStudent.gender}
-              onChange={(e) => setNewStudent({ ...newStudent, gender: e.target.value })}
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, gender: e.target.value })
+              }
               className="w-full p-2 border rounded"
               disabled={isLoading}
             >
-              <option value="">Chọn giới tính</option>
-              <option value="Nam">Nam</option>
-              <option value="Nữ">Nữ</option>
+              <option value="">{t("add_student:chon_gioi_tinh")}</option>
+              <option value="Nam">{t("add_student:nam")}</option>
+              <option value="Nữ">{t("add_student:nu")}</option>
             </select>
             <Input
               placeholder="Email"
               value={newStudent.email}
-              onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, email: e.target.value })
+              }
               disabled={isLoading}
             />
             <Input
-              placeholder="Số điện thoại (vd: +84123456789)"
+              placeholder={t("add_student:sdt")}
               value={newStudent.phoneNumber}
-              onChange={(e) => setNewStudent({ ...newStudent, phoneNumber: e.target.value })}
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, phoneNumber: e.target.value })
+              }
               disabled={isLoading}
             />
             <select
               value={newStudent.departmentId}
               onChange={(e) =>
-                setNewStudent({ ...newStudent, departmentId: Number(e.target.value) })
+                setNewStudent({
+                  ...newStudent,
+                  departmentId: Number(e.target.value),
+                })
               }
               className="w-full p-2 border rounded"
               disabled={isLoading || departments.length === 0}
             >
-              <option value={0}>Chọn khoa</option>
+              <option value={0}>{t("add_student:chon_khoa")}</option>
               {departments.map((dept) => (
                 <option key={dept.id} value={dept.id}>
                   {dept.name}
@@ -380,12 +425,15 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
             <select
               value={newStudent.statusId}
               onChange={(e) =>
-                setNewStudent({ ...newStudent, statusId: Number(e.target.value) })
+                setNewStudent({
+                  ...newStudent,
+                  statusId: Number(e.target.value),
+                })
               }
               className="w-full p-2 border rounded"
               disabled={isLoading || statuses.length === 0}
             >
-              <option value={0}>Chọn trạng thái</option>
+              <option value={0}>{t("add_student:chon_trang_thai")}</option>
               {statuses.map((status) => (
                 <option key={status.id} value={status.id}>
                   {status.name}
@@ -395,12 +443,15 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
             <select
               value={newStudent.programId}
               onChange={(e) =>
-                setNewStudent({ ...newStudent, programId: Number(e.target.value) })
+                setNewStudent({
+                  ...newStudent,
+                  programId: Number(e.target.value),
+                })
               }
               className="w-full p-2 border rounded"
               disabled={isLoading || programs.length === 0}
             >
-              <option value={0}>Chọn chương trình</option>
+              <option value={0}>{t("add_student:chon_chuong_trinh")}</option>
               {programs.map((prog) => (
                 <option key={prog.id} value={prog.id}>
                   {prog.name}
@@ -408,9 +459,11 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               ))}
             </select>
             <Input
-              placeholder="Khóa (ví dụ: K45)"
+              placeholder={t("add_student:chon_khoa")}
               value={newStudent.course}
-              onChange={(e) => setNewStudent({ ...newStudent, course: e.target.value })}
+              onChange={(e) =>
+                setNewStudent({ ...newStudent, course: e.target.value })
+              }
               disabled={isLoading}
             />
           </div>
@@ -418,7 +471,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
           {/* Cột 2: Thông tin StudentDetails */}
           <div className="space-y-4">
             <Input
-              placeholder="Số nhà (Địa chỉ thường trú)"
+              placeholder={t("add_student:so_nha")}
               value={newStudentDetails.permanentAddressHouse}
               onChange={(e) =>
                 setNewStudentDetails({
@@ -429,7 +482,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               disabled={isLoading}
             />
             <Input
-              placeholder="Phường/Xã (Địa chỉ thường trú)"
+              placeholder={t("add_student:phuong")}
               value={newStudentDetails.permanentAddressWard}
               onChange={(e) =>
                 setNewStudentDetails({
@@ -440,7 +493,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               disabled={isLoading}
             />
             <Input
-              placeholder="Quận/Huyện (Địa chỉ thường trú)"
+              placeholder={t("add_student:quan")}
               value={newStudentDetails.permanentAddressDistrict}
               onChange={(e) =>
                 setNewStudentDetails({
@@ -451,7 +504,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               disabled={isLoading}
             />
             <Input
-              placeholder="Tỉnh/Thành phố (Địa chỉ thường trú)"
+              placeholder={t("add_student:tinh")}
               value={newStudentDetails.permanentAddressCity}
               onChange={(e) =>
                 setNewStudentDetails({
@@ -462,7 +515,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               disabled={isLoading}
             />
             <Input
-              placeholder="Quốc gia (Địa chỉ thường trú)"
+              placeholder={t("add_student:quoc_gia")}
               value={newStudentDetails.permanentAddressCountry}
               onChange={(e) =>
                 setNewStudentDetails({
@@ -473,7 +526,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               disabled={isLoading}
             />
             <Input
-              placeholder="Địa chỉ tạm trú"
+              placeholder={t("add_student:tam_tru")}
               value={newStudentDetails.temporaryAddress}
               onChange={(e) =>
                 setNewStudentDetails({
@@ -484,7 +537,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               disabled={isLoading}
             />
             <Input
-              placeholder="Địa chỉ nhận thư"
+              placeholder={t("add_student:nhan_thu")}
               value={newStudentDetails.mailingAddress}
               onChange={(e) =>
                 setNewStudentDetails({
@@ -495,7 +548,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               disabled={isLoading}
             />
             <Input
-              placeholder="Quốc tịch"
+              placeholder={t("add_student:quoc_tich")}
               value={newStudentDetails.nationality}
               onChange={(e) =>
                 setNewStudentDetails({
@@ -520,18 +573,18 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               className="w-full p-2 border rounded"
               disabled={isLoading}
             >
-              <option value="">Chọn loại giấy tờ</option>
-              <option value="CMND">CMND</option>
-              <option value="CCCD">CCCD</option>
-              <option value="Hộ chiếu">Hộ chiếu</option>
+              <option value="">{t("add_student:chon_giay_to")}</option>
+              <option value="CMND">{t("add_student:cmnd")}</option>
+              <option value="CCCD">{t("add_student:cccd")}</option>
+              <option value="Hộ chiếu">{t("add_student:ho_chieu")}</option>
             </select>
             <Input
               placeholder={
                 newIdentityDocuments.identityType === "CMND"
-                  ? "Số CMND"
+                  ? t("add_student:so_cmnd")
                   : newIdentityDocuments.identityType === "CCCD"
-                  ? "Số CCCD"
-                  : "Số hộ chiếu"
+                  ? t("add_student:so_cccd")
+                  : t("add_student:so_ho_chieu")
               }
               value={newIdentityDocuments.identityNumber}
               onChange={(e) =>
@@ -543,7 +596,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               disabled={isLoading}
             />
             <div className="flex items-center space-x-2">
-              <label>Ngày cấp:</label>
+              <label>{t("add_student:ngay_cap")}</label>
               <Input
                 type="date"
                 className="w-auto"
@@ -558,7 +611,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               />
             </div>
             <Input
-              placeholder="Nơi cấp"
+              placeholder={t("add_student:noi_cap")}
               value={newIdentityDocuments.issuePlace}
               onChange={(e) =>
                 setNewIdentityDocuments({
@@ -569,7 +622,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
               disabled={isLoading}
             />
             <div className="flex items-center space-x-2">
-              <label>Ngày hết hạn:</label>
+              <label>{t("add_student:ngay_het_han")}</label>
               <Input
                 type="date"
                 className="w-auto"
@@ -595,13 +648,13 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
                   }
                   disabled={isLoading}
                 />
-                <label>Gắn chip</label>
+                <label>{t("add_student:gan_chip")}</label>
               </div>
             )}
             {newIdentityDocuments.identityType === "Hộ chiếu" && (
               <>
                 <Input
-                  placeholder="Quốc gia cấp"
+                  placeholder={t("add_student:quoc_gia_cap")}
                   value={newIdentityDocuments.issuingCountry}
                   onChange={(e) =>
                     setNewIdentityDocuments({
@@ -612,7 +665,7 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
                   disabled={isLoading}
                 />
                 <Input
-                  placeholder="Ghi chú"
+                  placeholder={t("add_student:ghi_chu")}
                   value={newIdentityDocuments.note}
                   onChange={(e) =>
                     setNewIdentityDocuments({
@@ -628,8 +681,12 @@ export default function AddStudentButton({ onStudentAdded }: AddStudentButtonPro
 
           {/* Nút Thêm */}
           <div className="col-span-3 mt-4">
-            <Button onClick={handleAddStudent} disabled={isLoading} className="w-full">
-              {isLoading ? "Đang thêm..." : "Thêm"}
+            <Button
+              onClick={handleAddStudent}
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? t("add_student:dang_them") : t("add_student:them")}
             </Button>
           </div>
         </div>

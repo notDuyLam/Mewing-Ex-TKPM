@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -71,6 +72,7 @@ interface Class {
 }
 
 export default function Classes() {
+  const { t } = useTranslation();
   const [classes, setClasses] = useState<Class[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -130,7 +132,7 @@ export default function Classes() {
     } catch (error) {
       console.error("Error fetching classes:", error);
       setClasses([]);
-      toast.error("Không thể tải danh sách lớp học!");
+      toast.error(t("classes:khong_tai_duoc_danh_sach_lop_hoc"));
     }
   };
 
@@ -155,7 +157,7 @@ export default function Classes() {
     } catch (error) {
       console.error("Error fetching semesters:", error);
       setSemesters([]);
-      toast.error("Không thể tải danh sách học kỳ!");
+      toast.error(t("classes:khong_tai_duoc_danh_sach_hoc_ky"));
     }
   };
 
@@ -177,7 +179,7 @@ export default function Classes() {
     } catch (error) {
       console.error("Error fetching courses:", error);
       setCourses([]);
-      toast.error("Không thể tải danh sách khóa học!");
+      toast.error(t("classes:khong_tai_duoc_danh_sach_khoa_hoc"));
     }
   };
 
@@ -199,7 +201,7 @@ export default function Classes() {
     } catch (error) {
       console.error("Error fetching teachers:", error);
       setTeachers([]);
-      toast.error("Không thể tải danh sách giáo viên!");
+      toast.error(t("classes:khong_tai_duoc_danh_sach_giao_vien"));
     }
   };
 
@@ -222,13 +224,13 @@ export default function Classes() {
       const startDate = new Date(semester.startDate);
       const endDate = new Date(semester.endDate);
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        return "Invalid Date";
+        return t("classes:ngay_khong_hop_le2");
       }
       const formatDate = (date: Date) =>
         `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
       return `${formatDate(startDate)}-${formatDate(endDate)}`;
     } catch {
-      return "Invalid Date";
+      return t("classes:ngay_khong_hop_le2");
     }
   };
 
@@ -241,7 +243,7 @@ export default function Classes() {
       !data.schedule ||
       !data.room
     ) {
-      toast.error("Vui lòng điền đầy đủ các trường bắt buộc!");
+      toast.error(t("classes:dien_day_du_cac_truong"));
       return false;
     }
 
@@ -260,17 +262,17 @@ export default function Classes() {
       schedule === "" ||
       room === ""
     ) {
-      toast.error("Các trường không được để trống!");
+      toast.error(t("classes:cac_truong_khong_duoc_trong"));
       return false;
     }
 
     if (!/^\d{2}:\d{2}$/.test(schedule)) {
-      toast.error("Lịch học phải có định dạng hợp lệ (VD: 08:00)!");
+      toast.error(t("classes:lich_hoc_khong_hop_le"));
       return false;
     }
 
     if (data.maxStudent <= 0) {
-      toast.error("Số sinh viên tối đa phải lớn hơn 0!");
+      toast.error(t("classes:so_sinh_vien_phai_lon_hon_0"));
       return false;
     }
 
@@ -284,7 +286,7 @@ export default function Classes() {
       !data.endDate ||
       !data.cancelDeadline
     ) {
-      toast.error("Vui lòng điền đầy đủ các trường bắt buộc cho học kỳ!");
+      toast.error(t("classes:dien_day_du_truong_hoc_ky"));
       return false;
     }
 
@@ -297,22 +299,22 @@ export default function Classes() {
       isNaN(endDate.getTime()) ||
       isNaN(cancelDeadline.getTime())
     ) {
-      toast.error("Ngày không hợp lệ!");
+      toast.error(t("classes:ngay_khong_hop_le"));
       return false;
     }
 
     if (endDate <= startDate) {
-      toast.error("Ngày kết thúc phải sau ngày bắt đầu!");
+      toast.error(t("classes:ngay_ket_thuc_sau_ngay_bat_dau"));
       return false;
     }
 
     if (cancelDeadline > endDate) {
-      toast.error("Hạn hủy phải trước ngày kết thúc!");
+      toast.error(t("classes:han_huy_truoc_ngay_ket_thuc"));
       return false;
     }
 
     if (!/^\d{4}$/.test(data.year)) {
-      toast.error("Năm phải là số có 4 chữ số!");
+      toast.error(t("classes:nam_4_chu_so"));
       return false;
     }
 
@@ -331,13 +333,13 @@ export default function Classes() {
 
       if (!res.ok) {
         const _data = await res.json();
-        toast.error(_data.message || "Không thể tạo học kỳ!");
+        toast.error(_data.message || t("classes:khong_the_tao_hoc_ky"));
         return;
       }
 
       const newSemester: Semester = await res.json();
       await fetchSemesters();
-      toast.success("Học kỳ đã được tạo thành công!");
+      toast.success(t("classes:hoc_ky_tao_thanh_cong"));
 
       const semesterId = String(newSemester.id);
       if (isEditDialog) {
@@ -359,7 +361,7 @@ export default function Classes() {
       setShowEditSemesterForm(false);
     } catch (error) {
       console.error("Error creating semester:", error);
-      toast.error("Không thể tạo học kỳ!");
+      toast.error(t("classes:khong_the_tao_hoc_ky"));
     }
   };
 
@@ -380,11 +382,11 @@ export default function Classes() {
       if (!res.ok) {
         const _data = await res.json();
         if (_data.message.includes("Course not found")) {
-          toast.error("Không tìm thấy khóa học!");
+          toast.error(t("classes:khoa_hoc_khong_ton_tai"));
         } else if (_data.message.includes("Class already exists")) {
-          toast.error("Lớp học đã tồn tại!");
+          toast.error(t("classes:lop_hoc_da_ton_tai"));
         } else if (_data.message.includes("deactivate")) {
-          toast.error("Khóa học đã bị vô hiệu hóa!");
+          toast.error(t("classes:khoa_hoc_da_vo_hieu_hoa"));
         } else {
           toast.error(_data.message);
         }
@@ -392,7 +394,7 @@ export default function Classes() {
       }
 
       await fetchClasses();
-      toast.success("Lớp học đã được tạo thành công!");
+      toast.success(t("classes:lop_hoc_tao_thanh_cong"));
       setCreateFormData({
         classId: "",
         courseId: "",
@@ -405,7 +407,7 @@ export default function Classes() {
       });
     } catch (error) {
       console.error("Error creating class:", error);
-      toast.error("Không thể tạo lớp học!");
+      toast.error(t("classes:khong_the_tao_lop_hoc"));
     }
   };
 
@@ -433,7 +435,7 @@ export default function Classes() {
       }
 
       await fetchClasses();
-      toast.success("Lớp học đã được cập nhật thành công!");
+      toast.success(t("classes:lop_hoc_cap_nhat_thanh_cong"));
       setEditFormData({
         classId: "",
         courseId: "",
@@ -448,7 +450,7 @@ export default function Classes() {
       setSelectedClassId(null);
     } catch (error) {
       console.error("Error updating class:", error);
-      toast.error("Không thể cập nhật lớp học!");
+      toast.error(t("classes:khong_the_cap_nhat_lop_hoc"));
     }
   };
 
@@ -480,7 +482,7 @@ export default function Classes() {
                 href="/"
                 className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded"
               >
-                Quản lý Sinh viên
+                {t("classes:quan_ly_sinh_vien")}
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
@@ -488,7 +490,7 @@ export default function Classes() {
                 href="/courses"
                 className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded"
               >
-                Quản lý Khóa học
+                {t("classes:quan_ly_khoa_hoc")}
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
@@ -496,7 +498,7 @@ export default function Classes() {
                 href="/classes"
                 className="text-lg font-semibold text-gray-100 bg-gray-800 px-4 py-2 rounded"
               >
-                Quản lý Lớp học
+                {t("classes:quan_ly_lop_hoc")}
               </NavigationMenuLink>
             </NavigationMenuItem>
           </div>
@@ -504,30 +506,30 @@ export default function Classes() {
       </NavigationMenu>
 
       <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Danh sách Lớp học</h1>
+        <h1 className="text-2xl font-bold mb-4">{t("classes:danh_sach_lop_hoc")}</h1>
         {isLoading ? (
-          <div className="text-center">Đang tải dữ liệu...</div>
+          <div className="text-center">{t("classes:dang_tai_du_lieu")}</div>
         ) : (
           <>
             <div className="flex justify-between mb-4">
               <Dialog>
                 <DialogTrigger asChild>
                   <Button disabled={!isFormValid()}>
-                    Thêm Lớp học
+                    {t("classes:them_lop_hoc")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Thêm Lớp học</DialogTitle>
+                    <DialogTitle>{t("classes:them_lop_hoc")}</DialogTitle>
                     <DialogDescription>
-                      Điền thông tin lớp học bên dưới. Nhấn Lưu khi hoàn tất.
+                      {t("classes:dien_thong_tin_lop_hoc")}
                     </DialogDescription>
                   </DialogHeader>
                   {showCreateSemesterForm ? (
                     <div className="grid gap-4 py-4">
                       <div className="grid grid-cols-4 items-center gap-4">
                         <label htmlFor="semesterYear" className="text-right">
-                          Năm
+                          {t("classes:nam")}
                         </label>
                         <Input
                           id="semesterYear"
@@ -544,7 +546,7 @@ export default function Classes() {
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
                         <label htmlFor="startDate" className="text-right">
-                          Ngày bắt đầu
+                          {t("classes:ngay_bat_dau")}
                         </label>
                         <Input
                           id="startDate"
@@ -561,7 +563,7 @@ export default function Classes() {
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
                         <label htmlFor="endDate" className="text-right">
-                          Ngày kết thúc
+                          {t("classes:ngay_ket_thuc")}
                         </label>
                         <Input
                           id="endDate"
@@ -578,7 +580,7 @@ export default function Classes() {
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
                         <label htmlFor="cancelDeadline" className="text-right">
-                          Hạn hủy
+                          {t("classes:han_huy")}
                         </label>
                         <Input
                           id="cancelDeadline"
@@ -598,10 +600,10 @@ export default function Classes() {
                           variant="outline"
                           onClick={() => setShowCreateSemesterForm(false)}
                         >
-                          Hủy
+                          {t("classes:huy")}
                         </Button>
                         <Button onClick={() => handleCreateSemester(false)}>
-                          Lưu học kỳ
+                          {t("classes:luu_hoc_ky")}
                         </Button>
                       </div>
                     </div>
@@ -609,7 +611,7 @@ export default function Classes() {
                     <div className="grid gap-4 py-4">
                       <div className="grid grid-cols-4 items-center gap-4">
                         <label htmlFor="classId" className="text-right">
-                          Mã Lớp học
+                          {t("classes:ma_lop_hoc")}
                         </label>
                         <Input
                           id="classId"
@@ -625,7 +627,7 @@ export default function Classes() {
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
                         <label htmlFor="courseId" className="text-right">
-                          Khóa học
+                          {t("classes:khoa_hoc")}
                         </label>
                         <Select
                           value={createFormData.courseId}
@@ -637,7 +639,7 @@ export default function Classes() {
                           }
                         >
                           <SelectTrigger className="col-span-3">
-                            <SelectValue placeholder="Chọn khóa học" />
+                            <SelectValue placeholder={t("classes:chon_khoa_hoc")} />
                           </SelectTrigger>
                           <SelectContent>
                             {courses.length > 0 ? (
@@ -651,7 +653,7 @@ export default function Classes() {
                               ))
                             ) : (
                               <SelectItem value="0" disabled>
-                                Không có khóa học nào
+                                {t("classes:khong_co_khoa_hoc")}
                               </SelectItem>
                             )}
                           </SelectContent>
@@ -659,7 +661,7 @@ export default function Classes() {
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
                         <label htmlFor="year" className="text-right">
-                          Năm học
+                          {t("classes:nam_hoc")}
                         </label>
                         <Input
                           id="year"
@@ -676,7 +678,7 @@ export default function Classes() {
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
                         <label htmlFor="semesterId" className="text-right">
-                          Học kỳ
+                          {t("classes:hoc_ky")}
                         </label>
                         <div className="col-span-3 flex gap-2">
                           <Select
@@ -689,7 +691,7 @@ export default function Classes() {
                             }
                           >
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Chọn học kỳ" />
+                              <SelectValue placeholder={t("classes:chon_hoc_ky")} />
                             </SelectTrigger>
                             <SelectContent>
                               {semesters.length > 0 ? (
@@ -703,7 +705,7 @@ export default function Classes() {
                                 ))
                               ) : (
                                 <SelectItem value="0" disabled>
-                                  Không có học kỳ nào
+                                  {t("classes:khong_co_hoc_ky")}
                                 </SelectItem>
                               )}
                             </SelectContent>
@@ -712,13 +714,13 @@ export default function Classes() {
                             variant="outline"
                             onClick={() => setShowCreateSemesterForm(true)}
                           >
-                            Thêm học kỳ
+                            {t("classes:them_hoc_ky")}
                           </Button>
                         </div>
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
                         <label htmlFor="teacherId" className="text-right">
-                          Giáo viên
+                          {t("classes:giao_vien")}
                         </label>
                         <Select
                           value={createFormData.teacherId}
@@ -730,7 +732,7 @@ export default function Classes() {
                           }
                         >
                           <SelectTrigger className="col-span-3">
-                            <SelectValue placeholder="Chọn giáo viên" />
+                            <SelectValue placeholder={t("classes:chon_giao_vien")} />
                           </SelectTrigger>
                           <SelectContent>
                             {teachers.length > 0 ? (
@@ -744,7 +746,7 @@ export default function Classes() {
                               ))
                             ) : (
                               <SelectItem value="0" disabled>
-                                Không có giáo viên nào
+                                {t("classes:khong_co_giao_vien")}
                               </SelectItem>
                             )}
                           </SelectContent>
@@ -752,7 +754,7 @@ export default function Classes() {
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
                         <label htmlFor="maxStudent" className="text-right">
-                          Số sinh viên tối đa
+                          {t("classes:so_sinh_vien_toi_da")}
                         </label>
                         <Input
                           id="maxStudent"
@@ -769,7 +771,7 @@ export default function Classes() {
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
                         <label htmlFor="schedule" className="text-right">
-                          Lịch học
+                          {t("classes:lich_hoc")}
                         </label>
                         <Input
                           id="schedule"
@@ -786,7 +788,7 @@ export default function Classes() {
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
                         <label htmlFor="room" className="text-right">
-                          Phòng học
+                          {t("classes:phong_hoc")}
                         </label>
                         <Input
                           id="room"
@@ -804,11 +806,11 @@ export default function Classes() {
                   )}
                   <DialogFooter>
                     <DialogClose asChild>
-                      <Button variant="outline">Hủy</Button>
+                      <Button variant="outline">{t("classes:huy")}</Button>
                     </DialogClose>
                     {!showCreateSemesterForm && (
                       <Button onClick={handleCreate} disabled={!isFormValid()}>
-                        Lưu
+                        {t("classes:luu")}
                       </Button>
                     )}
                   </DialogFooter>
@@ -819,15 +821,15 @@ export default function Classes() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Mã Lớp học</TableHead>
-                  <TableHead>Khóa học</TableHead>
-                  <TableHead>Năm học</TableHead>
-                  <TableHead>Học kỳ</TableHead>
-                  <TableHead>Giáo viên</TableHead>
-                  <TableHead>Số sinh viên tối đa</TableHead>
-                  <TableHead>Lịch học</TableHead>
-                  <TableHead>Phòng học</TableHead>
-                  <TableHead>Hành động</TableHead>
+                  <TableHead>{t("classes:ma_lop_hoc")}</TableHead>
+                  <TableHead>{t("classes:khoa_hoc")}</TableHead>
+                  <TableHead>{t("classes:nam_hoc")}</TableHead>
+                  <TableHead>{t("classes:hoc_ky")}</TableHead>
+                  <TableHead>{t("classes:giao_vien")}</TableHead>
+                  <TableHead>{t("classes:so_sinh_vien_toi_da")}</TableHead>
+                  <TableHead>{t("classes:lich_hoc")}</TableHead>
+                  <TableHead>{t("classes:phong_hoc")}</TableHead>
+                  <TableHead>{t("classes:hanh_dong")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -866,15 +868,14 @@ export default function Classes() {
                                 variant="outline"
                                 onClick={() => handleEdit(classItem)}
                               >
-                                Sửa
+                                {t("classes:sua")}
                               </Button>
                             </DialogTrigger>
                             <DialogContent>
                               <DialogHeader>
-                                <DialogTitle>Cập nhật Lớp học</DialogTitle>
+                                <DialogTitle>{t("classes:cap_nhat_lop_hoc")}</DialogTitle>
                                 <DialogDescription>
-                                  Cập nhật thông tin lớp học bên dưới. Nhấn Lưu
-                                  khi hoàn tất.
+                                  {t("classes:cap_nhat_thong_tin_lop_hoc")}
                                 </DialogDescription>
                               </DialogHeader>
                               {showEditSemesterForm ? (
@@ -884,7 +885,7 @@ export default function Classes() {
                                       htmlFor="semesterYear"
                                       className="text-right"
                                     >
-                                      Năm
+                                      {t("classes:nam")}
                                     </label>
                                     <Input
                                       id="semesterYear"
@@ -904,7 +905,7 @@ export default function Classes() {
                                       htmlFor="startDate"
                                       className="text-right"
                                     >
-                                      Ngày bắt đầu
+                                      {t("classes:ngay_bat_dau")}
                                     </label>
                                     <Input
                                       id="startDate"
@@ -924,7 +925,7 @@ export default function Classes() {
                                       htmlFor="endDate"
                                       className="text-right"
                                     >
-                                      Ngày kết thúc
+                                      {t("classes:ngay_ket_thuc")}
                                     </label>
                                     <Input
                                       id="endDate"
@@ -944,7 +945,7 @@ export default function Classes() {
                                       htmlFor="cancelDeadline"
                                       className="text-right"
                                     >
-                                      Hạn hủy
+                                      {t("classes:han_huy")}
                                     </label>
                                     <Input
                                       id="cancelDeadline"
@@ -966,12 +967,12 @@ export default function Classes() {
                                         setShowEditSemesterForm(false)
                                       }
                                     >
-                                      Hủy
+                                      {t("classes:huy")}
                                     </Button>
                                     <Button
                                       onClick={() => handleCreateSemester(true)}
                                     >
-                                      Lưu học kỳ
+                                      {t("classes:luu_hoc_ky")}
                                     </Button>
                                   </div>
                                 </div>
@@ -982,7 +983,7 @@ export default function Classes() {
                                       htmlFor="editClassId"
                                       className="text-right"
                                     >
-                                      Mã Lớp học
+                                      {t("classes:ma_lop_hoc")}
                                     </label>
                                     <Input
                                       id="editClassId"
@@ -1002,7 +1003,7 @@ export default function Classes() {
                                       htmlFor="editCourseId"
                                       className="text-right"
                                     >
-                                      Khóa học
+                                      {t("classes:khoa_hoc")}
                                     </label>
                                     <Select
                                       value={editFormData.courseId}
@@ -1014,7 +1015,7 @@ export default function Classes() {
                                       }
                                     >
                                       <SelectTrigger className="col-span-3">
-                                        <SelectValue placeholder="Chọn khóa học" />
+                                        <SelectValue placeholder={t("classes:chon_khoa_hoc")} />
                                       </SelectTrigger>
                                       <SelectContent>
                                         {courses.length > 0 ? (
@@ -1028,7 +1029,7 @@ export default function Classes() {
                                           ))
                                         ) : (
                                           <SelectItem value="0" disabled>
-                                            Không có khóa học nào
+                                            {t("classes:khong_co_khoa_hoc")}
                                           </SelectItem>
                                         )}
                                       </SelectContent>
@@ -1039,7 +1040,7 @@ export default function Classes() {
                                       htmlFor="editYear"
                                       className="text-right"
                                     >
-                                      Năm học
+                                      {t("classes:nam_hoc")}
                                     </label>
                                     <Input
                                       id="editYear"
@@ -1059,7 +1060,7 @@ export default function Classes() {
                                       htmlFor="editSemesterId"
                                       className="text-right"
                                     >
-                                      Học kỳ
+                                      {t("classes:hoc_ky")}
                                     </label>
                                     <div className="col-span-3 flex gap-2">
                                       <Select
@@ -1072,7 +1073,7 @@ export default function Classes() {
                                         }
                                       >
                                         <SelectTrigger className="w-full">
-                                          <SelectValue placeholder="Chọn học kỳ" />
+                                          <SelectValue placeholder={t("classes:chon_hoc_ky")} />
                                         </SelectTrigger>
                                         <SelectContent>
                                           {semesters.length > 0 ? (
@@ -1086,7 +1087,7 @@ export default function Classes() {
                                             ))
                                           ) : (
                                             <SelectItem value="0" disabled>
-                                              Không có học kỳ nào
+                                              {t("classes:khong_co_hoc_ky")}
                                             </SelectItem>
                                           )}
                                         </SelectContent>
@@ -1097,7 +1098,7 @@ export default function Classes() {
                                           setShowEditSemesterForm(true)
                                         }
                                       >
-                                        Thêm học kỳ
+                                        {t("classes:them_hoc_ky")}
                                       </Button>
                                     </div>
                                   </div>
@@ -1106,7 +1107,7 @@ export default function Classes() {
                                       htmlFor="editTeacherId"
                                       className="text-right"
                                     >
-                                      Giáo viên
+                                      {t("classes:giao_vien")}
                                     </label>
                                     <Select
                                       value={editFormData.teacherId}
@@ -1118,7 +1119,7 @@ export default function Classes() {
                                       }
                                     >
                                       <SelectTrigger className="col-span-3">
-                                        <SelectValue placeholder="Chọn giáo viên" />
+                                        <SelectValue placeholder={t("classes:chon_giao_vien")} />
                                       </SelectTrigger>
                                       <SelectContent>
                                         {teachers.length > 0 ? (
@@ -1132,7 +1133,7 @@ export default function Classes() {
                                           ))
                                         ) : (
                                           <SelectItem value="0" disabled>
-                                            Không có giáo viên nào
+                                            {t("classes:khong_co_giao_vien")}
                                           </SelectItem>
                                         )}
                                       </SelectContent>
@@ -1143,7 +1144,7 @@ export default function Classes() {
                                       htmlFor="editMaxStudent"
                                       className="text-right"
                                     >
-                                      Số sinh viên tối đa
+                                      {t("classes:so_sinh_vien_toi_da")}
                                     </label>
                                     <Input
                                       id="editMaxStudent"
@@ -1163,7 +1164,7 @@ export default function Classes() {
                                       htmlFor="editSchedule"
                                       className="text-right"
                                     >
-                                      Lịch học
+                                      {t("classes:lich_hoc")}
                                     </label>
                                     <Input
                                       id="editSchedule"
@@ -1183,7 +1184,7 @@ export default function Classes() {
                                       htmlFor="editRoom"
                                       className="text-right"
                                     >
-                                      Phòng học
+                                      {t("classes:phong_hoc")}
                                     </label>
                                     <Input
                                       id="editRoom"
@@ -1201,14 +1202,14 @@ export default function Classes() {
                               )}
                               <DialogFooter>
                                 <DialogClose asChild>
-                                  <Button variant="outline">Hủy</Button>
+                                  <Button variant="outline">{t("classes:huy")}</Button>
                                 </DialogClose>
                                 {!showEditSemesterForm && (
                                   <Button
                                     onClick={handleUpdate}
                                     disabled={!isFormValid()}
                                   >
-                                    Lưu
+                                    {t("classes:luu")}
                                   </Button>
                                 )}
                               </DialogFooter>
@@ -1221,7 +1222,7 @@ export default function Classes() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center">
-                      Không có lớp học nào
+                      {t("classes:khong_co_lop_hoc")}
                     </TableCell>
                   </TableRow>
                 )}
