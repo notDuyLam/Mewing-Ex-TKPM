@@ -8,12 +8,18 @@ Student Management
 
 ### Backend
 
-1. ```
-    cd backend/
-   ```
-2. ```
-    npm install
-   ```
+1.
+
+```
+cd backend/
+```
+
+2.
+
+```
+npm install
+```
+
 3. Tạo file <b>.env</b> với cấu trúc như <b>.env.example</b>
 
    ```
@@ -87,10 +93,12 @@ npm run dev
 ```
 
 ## Cấu Hình Đa Ngôn Ngữ
+
 - File dịch thuật nằm trong `frontend/src/locales/`.
 - Thêm ngôn ngữ mới bằng cách tạo thư mục (e.g., `en/`) và file JSON tương ứng.
 - Cập nhật `i18nConfig.js` trong `frontend/src/` để thêm ngôn ngữ mới.
 
 ## Lưu Ý
+
 - Kiểm tra tính hợp lệ của email (`@student.university.edu.vn`) và số điện thoại (`+84xxxxxxxxx`).
 - Đảm bảo tất cả thay đổi schema được thực hiện qua migrations.
